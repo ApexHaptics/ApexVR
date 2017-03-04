@@ -151,7 +151,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
 
 
         shadows = new Shadow(shadowProgram,
-                new float[]{0.0f,1.0f,0.0f},
+                LIGHT_DIR_IN_WORLD_SPACE,
                 new Shadow.BoundingBox(new float[]{0.0f,0.0f,0.0f},new float[]{120.0f,120.0f,20.0f}));
 
         //Meshes

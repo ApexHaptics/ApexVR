@@ -16,6 +16,11 @@ public class ColouredInterleavedMesh extends Mesh {
 
     public static final int FLOAT_STRIDE = 9;
 
+    public ColouredInterleavedMesh(FloatBuffer vertices, IntBuffer indexes){
+        this.indexes = indexes;
+        this.vertices = vertices;
+    }
+
     private ColouredInterleavedMesh(MeshConstructionData meshData){
 
 

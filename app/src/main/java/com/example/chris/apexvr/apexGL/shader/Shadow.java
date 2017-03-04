@@ -17,7 +17,8 @@ public class Shadow implements LightingExtention {
 
 
     private static final String TAG = "Shadows";
-    private static final int TEXTURE_DIM = 1024;
+    //private static final int TEXTURE_DIM = 1024;
+    private static final int TEXTURE_DIM = 2048;
     private static final float[] SCREEN_BIAS = new float[]{
             0.5f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.5f, 0.0f, 0.0f,
@@ -94,9 +95,9 @@ public class Shadow implements LightingExtention {
 
         GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_NEAREST);
         GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_NEAREST);
-        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_REPEAT);
-        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_REPEAT);
-        GLError.checkGLError(TAG,"TexParameteri");
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE);
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE);
+        GLError.checkGLError(TAG,"TexParameterf");
 
 
 
@@ -150,6 +151,7 @@ public class Shadow implements LightingExtention {
 
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
         GLES30.glDepthFunc(GLES30.GL_LESS);
+        GLES30.glCullFace(GLES30.GL_FRONT);
 
         GLES30.glGetIntegerv(GLES30.GL_VIEWPORT,viewPort,0);
         GLES30.glGetIntegerv(GLES30.GL_DRAW_FRAMEBUFFER_BINDING,boundBuffer,0);
@@ -158,6 +160,7 @@ public class Shadow implements LightingExtention {
         GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, buffers[0]);
 
         GLES30.glClear(GLES30.GL_DEPTH_BUFFER_BIT);
+
 
         GLES30.glEnableVertexAttribArray(vetexAtribID);
         for(GLObject caster : casters){
@@ -168,8 +171,10 @@ public class Shadow implements LightingExtention {
         GLError.checkGLError(TAG,"draw static shadow drawing");
 
 
+
         GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, boundBuffer[0]);
         GLES30.glViewport(viewPort[0], viewPort[1], viewPort[2], viewPort[3]);
+        GLES30.glCullFace(GLES30.GL_BACK);
     }
 
     public float[] getPV() {

@@ -5,7 +5,8 @@ in vec4 GlobalFragPos;
 
 layout(location = 0) out vec4 diffuseColor;
 
-vec3 skyColour = vec3(0.5f, 0.162f, 0.114f);
+//vec3 skyColour = vec3(0.5f, 0.162f, 0.114f);0.8f, 0.93f, 1.0f
+vec3 skyColour = vec3(0.8f, 0.93f, 1.0f);
 vec3 fogColour = vec3(0.6f,0.6f,0.5f);
 
 vec3 sunRingColour = vec3(0.9961f, 0.5977f, 0.3984f);

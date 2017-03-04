@@ -1,0 +1,11 @@
+# Blender MTL File: 'fydp_lighting.blend'
+# Material Count: 1
+
+newmtl Material.009
+Ns 96.078431
+Ka 0.015995 0.007423 0.007423
+Kd 0.043981 0.020173 0.006673
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
