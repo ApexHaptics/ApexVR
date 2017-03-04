@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="true"
+        jar="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\exploded-aar\com.google.vr\sdk-base\1.10.0\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="d00981db16e297a76c95aba4372d200b1e2420d2">
+        <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.google.vr-sdk-base-1.10.0_8222673b770d2748afadda0131f9ad7c7f972705\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\exploded-aar\com.android.support\support-media-compat\25.1.1\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="7bde4c34162092e0a77e7f12dc85ed77c484cf5c">
+        <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-media-compat-25.1.1_723fb28cf7ea1f34e2b4720b1721e35e3d525024\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\incremental-runtime-classes\debug\instant-run.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="fa04862b438a5f94580d6f7b1c529d9528560863">
+        <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run_f303d1f4c2ed98bf68bae5cd6cd5e40f676f5690\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\exploded-aar\com.android.support\support-compat\25.1.1\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="02741d05d4b697fba5e279e9881aaa1da0ca7c7f">
+        <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-compat-25.1.1_8509012cf5630d65156b419f81fe7d5f3705ea25\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\exploded-aar\com.google.vr\sdk-audio\1.10.0\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="f73e02badf8404a0c3bab95d94ec28ebe9467210">
+        <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.google.vr-sdk-audio-1.10.0_65748838ccd3ac614013f8ff55ac9b001fb8393c\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\exploded-aar\com.android.support\animated-vector-drawable\25.1.1\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="0d191c1a09e4892d059e5ce749e4ad4e08129e35">
+        <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-animated-vector-drawable-25.1.1_bc822050ab17af29db3935fab397509844b81ccb\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Chris\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\25.1.1\support-annotations-25.1.1.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="b59b6ee8d6ecc03e672d253800430343493a6ed8">
+        <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\support-annotations-25.1.1_6bceb9dfe859fee9265e1b50f6c9855340e63014\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\25.1.1\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="ecb496cc08dd52551fc5ec6db3bc0632e95a89bb">
+        <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-appcompat-v7-25.1.1_ad531cf9a200214bc28fdd293ecdf7faa157663d\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\incremental-classes\debug\instant-run-bootstrap.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="6b197853e844068c24f0826237c7752238ccc4d3">
+        <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run-bootstrap_92ec66bfeb339fd1ba1bf320061239ea361a8a85\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\exploded-aar\com.android.support\support-fragment\25.1.1\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="e2719c102dca3a7a5b02ce07f769362da6ddb4ab">
+        <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-fragment-25.1.1_844af15899a3e37f1d663f6b2b8f7b7567049ac0\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\exploded-aar\com.android.support\support-vector-drawable\25.1.1\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="c03bf57f358aa10d253f21989e93bcf6014b3b17">
+        <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-vector-drawable-25.1.1_df1b20c4cb2c2778e4ef903ab1c460641a407776\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\exploded-aar\com.android.support\support-core-ui\25.1.1\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="3e04ac8ca644ea7baddf6fdcf72e15c79e9df94a">
+        <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-core-ui-25.1.1_4513002ccc46966e9d4279ee879f7d32c09c64a2\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Chris\.gradle\caches\modules-2\files-2.1\com.google.protobuf.nano\protobuf-javanano\3.1.0\5110f05deac8f15244897b3f70e9ce413468771d\protobuf-javanano-3.1.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="5110f05deac8f15244897b3f70e9ce413468771d">
+        <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\protobuf-javanano-3.1.0_4bdb207829713c5109f1a2d7e1753f5549cbd9b3\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\exploded-aar\com.android.support\support-core-utils\25.1.1\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="0fb891e8f0cfba0513043a7bb357513d229ca2cd">
+        <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-core-utils-25.1.1_f28dd54b8446117d007ac041a4e98ecb2e489b2b\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\exploded-aar\com.google.vr\sdk-common\1.10.0\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="e5f4e44ef932f9ce4e19dde2e24375ebee06e686">
+        <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.google.vr-sdk-common-1.10.0_2cf63e55365194d84f05255bcf06bf2f93c667db\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\exploded-aar\com.android.support\support-v4\25.1.1\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="d7c42c80f6509b9ea4db28ca7859ffae08ec5741">
+        <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-v4-25.1.1_5fdf2218bb1640f2dd082e366f52d0bb388cbdfc\classes.dex" />
+    </item>
+
+</items>
