@@ -19,8 +19,8 @@ public class GroundCreater {
     private float edge;
     private float size;
 
-    private static final float[] GRASS_COLOUR = {0.3906f, 0.5547f, 0.3477f};
-    private static final float[] STONE_COLOUR = {0.5156f, 0.4805f, 0.4805f};
+    private static final float[] GRASS_COLOUR = {0.094625f, 0.063519f, 0.018978f};
+    private static final float[] STONE_COLOUR = {0.3164f, 0.3047f, 0.2734f};
 
     public GroundCreater(float size, int width){
 
@@ -74,17 +74,17 @@ public class GroundCreater {
 
 
     public float interpolate(float x, float y){
-        float xCLose = (x / width + 0.5f) * lastIndex;
-        float yCLose = (y / width + 0.5f) * lastIndex;
+        float xCLose = (x / size + 0.5f) * lastIndex;
+        float yCLose = (y / size + 0.5f) * lastIndex;
 
-        int xLower = clamp((int)((x / width + 0.5f) * lastIndex),0,lastIndex);
-        int yLower = clamp((int)((y / width + 0.5f) * lastIndex),0,lastIndex);
+        int xLower = clamp((int)xCLose,0,lastIndex);
+        int yLower = clamp((int)yCLose,0,lastIndex);
 
-        int xUpper = clamp(xLower + 1,0,lastIndex);
-        int yUpper = clamp(yLower + 1,0,lastIndex);
+        int xUpper = clamp((int)(xCLose + 1.0f),0,lastIndex);
+        int yUpper = clamp((int)(yCLose + 1.0f),0,lastIndex);
 
-        float xScale = (x % edge) / edge;
-        float yScale = (y % edge) / edge;
+        float xScale = (float) (xCLose - Math.floor(xCLose));
+        float yScale = (float) (yCLose - Math.floor(yCLose));
 
         float xHigh = grid[xLower][yUpper] * xScale + grid[xUpper][yUpper] * (1.0f - xScale);
         float xLow = grid[xLower][yLower] * xScale + grid[xUpper][yLower] * (1.0f - xScale);
@@ -106,6 +106,37 @@ public class GroundCreater {
         float delta2 = (grid[x2][y1] - grid[x1][y2]) / cross;
 
         return (float) Math.sqrt(delta1 * delta1 + delta2 * delta2);
+    }
+
+    public float[] normal(float x, float y){
+        float xCLose = (x / width + 0.5f) * lastIndex;
+        float yCLose = (y / width + 0.5f) * lastIndex;
+
+        int xLower = clamp((int)((x / width + 0.5f) * lastIndex),0,lastIndex);
+        int yLower = clamp((int)((y / width + 0.5f) * lastIndex),0,lastIndex);
+
+        int xUpper = clamp((int)((x / width + 0.5f) * lastIndex + 0.5f),0,lastIndex);
+        int yUpper = clamp((int)((y / width + 0.5f) * lastIndex + 0.5f),0,lastIndex);
+
+        float xScale = (xCLose % edge) / edge;
+        float yScale = (yCLose % edge) / edge;
+
+        float[] normal = new float[3];
+
+        float[] normal11 = normal(xLower, yLower);
+        float[] normal12 = normal(xLower, yUpper);
+
+        float[] normal21 = normal(xUpper, yLower);
+        float[] normal22 = normal(xUpper, yUpper);
+
+        for(int i = 0; i < 3; ++i){
+            float high = normal11[i] * xScale + normal12[i] * (1.0f - xScale);
+            float low = normal21[i] * xScale + normal22[i] * (1.0f - xScale);
+
+            normal[i] = low * yScale + high * (1.0f - yScale);
+        }
+
+        return normal;
     }
 
     public float[] normal(int x, int y){

@@ -142,6 +142,12 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
             e.printStackTrace();
             throw new RuntimeException("Could not open matlib file: matlibs/graound.mtl");
         }
+        try {
+            matLib.addMatLib(getAssets().open("matlibs/grass.mtl"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Could not open matlib file: matlibs/graound.mtl");
+        }
 
 
         shadows = new Shadow(shadowProgram,
@@ -176,6 +182,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
             e.printStackTrace();
             throw new RuntimeException("Could not open obj file: meshes/sky.obj");
         }
+
 
         try {
             ColouredInterleavedMesh colouredMesh = ColouredInterleavedMesh.importOBJInterleavedMesh(getAssets().open("meshes/tree.obj"),matLib);
@@ -221,6 +228,59 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
             e.printStackTrace();
             throw new RuntimeException("Could not open obj file: meshes/ground.obj");
         }
+
+
+        try {
+            ColouredInterleavedMesh colouredMesh = ColouredInterleavedMesh.importOBJInterleavedMesh(getAssets().open("meshes/grass.obj"),matLib);
+            MultiCSObject grass = new MultiCSObject(colProgram,colouredMesh);
+            Matrix.translateM(grass.getOrientation(),0,0.0f,-groudAtZero,0.0f);
+            grass.setCastingShadow(true);
+            grass.addExtention(shadows);
+
+            float[] sub = new float[16];
+            float[] eye = new float[16];
+            Random random = new Random();
+
+            Matrix.setIdentityM(eye,0);
+
+            for(int i = 0; i < 75; ++i){
+                float r = 2.0f + 18.0f * random.nextFloat();
+                float angle = (float) (2.0 * Math.PI * random.nextFloat());
+
+                float xPos = (float) (Math.cos(angle) * r);
+                float zPos = (float) (Math.sin(angle) * r);
+                float yPos = groundCreater.interpolate(xPos,zPos);
+                Matrix.translateM(sub,0,eye,0,xPos,yPos,zPos);
+
+                /*
+
+                float rotation = random.nextFloat() * 360.0f;
+                Matrix.rotateM(sub,0,rotation,0,1.0f,0);
+                */
+                /*
+
+                float[] normal = groundCreater.normal(xPos,zPos);
+                Matrix.setRotateM(sub,0, (float) Math.acos(normal[1]),normal[2],0.0f,-normal[0]);
+                */
+                /*
+
+                float xzScale = random.nextFloat()*0.5f + 0.75f;
+                float yScale = random.nextFloat()*0.5f + 0.75f;
+                Matrix.scaleM(sub,0,xzScale,yScale,xzScale);
+                */
+
+                grass.addSubObject(sub.clone());
+
+            }
+
+
+            glObjects.add(grass);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Could not open obj file: meshes/ground.obj");
+        }
+
+
 
         shadows.createStaticShadowMap(glObjects);
 
@@ -330,6 +390,8 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         Matrix.multiplyMM(view, 0,eye.getEyeView(), 0, mCamera, 0);
 
         float[] perspective = eye.getPerspective(Z_NEAR, Z_FAR);
+
+        GLES30.glCullFace(GLES30.GL_BACK);
 
         for(GLObject glObject : glObjects){
             glObject.draw(perspective,view);
