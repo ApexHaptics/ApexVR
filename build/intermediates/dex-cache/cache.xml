@@ -25,7 +25,7 @@
         jumboMode="true"
         optimize="true"
         revision="25.0.2"
-        sha1="fa04862b438a5f94580d6f7b1c529d9528560863">
+        sha1="358291dba66518e2e732daa2524f6efed8709b1d">
         <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run_f303d1f4c2ed98bf68bae5cd6cd5e40f676f5690\classes.dex" />
     </item>
     <item
@@ -79,7 +79,7 @@
         jumboMode="true"
         optimize="true"
         revision="25.0.2"
-        sha1="6b197853e844068c24f0826237c7752238ccc4d3">
+        sha1="7eb485ee343c534d5043d2056e34c56b2de9791d">
         <dex dex="C:\Users\Chris\AndroidStudioProjects\ApexVR\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run-bootstrap_92ec66bfeb339fd1ba1bf320061239ea361a8a85\classes.dex" />
     </item>
     <item

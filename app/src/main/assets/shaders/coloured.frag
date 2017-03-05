@@ -26,17 +26,39 @@ float groundStrength = 0.2f;
 float ambientStrength = 1.0f;
 float fogConstant = 0.01f;
 
-float linstep(float low, float high, float v){
-    return clamp((v-low)/(high-low), 0.0, 1.0);
+float texture2DCompare(sampler2D depths, vec2 uv, float compare){
+    float depth = texture(depths, uv).r;
+    return step(compare, depth);
 }
 
-float VSM(sampler2D depths, vec2 uv, float compare){
-    vec2 moments = texture(depths, uv).xy;
-    float p = smoothstep(compare-0.02, compare, moments.x);
-    float variance = max(moments.y - moments.x*moments.x, -0.001);
-    float d = compare - moments.x;
-    float p_max = linstep(0.2, 1.0, variance / (variance + d*d));
-    return clamp(max(p, p_max), 0.0, 1.0);
+float texture2DShadowLerp(sampler2D depths, vec2 size, vec2 uv, float compare){
+    vec2 texelSize = vec2(1.0)/size;
+    vec2 f = fract(uv*size+0.5);
+    vec2 centroidUV = floor(uv*size+0.5)/size;
+
+    float lb = texture2DCompare(depths, centroidUV+texelSize*vec2(0.0, 0.0), compare);
+    float lt = texture2DCompare(depths, centroidUV+texelSize*vec2(0.0, 1.0), compare);
+    float rb = texture2DCompare(depths, centroidUV+texelSize*vec2(1.0, 0.0), compare);
+    float rt = texture2DCompare(depths, centroidUV+texelSize*vec2(1.0, 1.0), compare);
+    float a = mix(lb, lt, f.y);
+    float b = mix(rb, rt, f.y);
+    float c = mix(a, b, f.x);
+    return c;
+}
+
+vec2 mod7(vec2 x) {
+  return x - floor(x / 7.0f) * 7.0;
+}
+
+float PCF(sampler2D depths, vec2 size, vec2 uv, float compare){
+    float result = 0.0;
+    for(int x=-1; x<=1; x++){
+        for(int y=-1; y<=1; y++){
+            vec2 off = (vec2(x,y) + (mod7(vec2(x,y)  + uv) - 3.5f)*2.0f)/size;
+            result += texture2DShadowLerp(depths, size, uv+off, compare);
+        }
+    }
+    return result/9.0;
 }
 
 void main(){
@@ -57,7 +79,7 @@ void main(){
 
 
 
-    sun = sun * VSM(depthMap,ShadowCord.xy,ShadowCord.z - shadowBias);
+    sun = sun * PCF(depthMap, vec2(textureSize(depthMap, 0)), ShadowCord.xy,ShadowCord.z - shadowBias);
 
 
     float d = sqrt(FragPos.z*FragPos.z+FragPos.x*FragPos.x+FragPos.y*FragPos.y);
@@ -69,8 +91,6 @@ void main(){
     vec3 colouring = Colour * (ambient + sun + sky + ground) * smoothstep(1.0f, 0.0f, (c-2.0f)/50.f);;
 
     diffuseColor = vec4(pow(mix(fogColour,colouring,f), vec3(1.0f/2.2f)),1.0f);
-
-    diffuseColor = diffuseColor * 0.0f + vec4(vec3(texture(depthMap, ShadowCord.xy).y),1.0f);
 
 }
 
