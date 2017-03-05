@@ -16,7 +16,6 @@ import com.example.chris.apexvr.apexGL.object.VertexObject;
 import com.example.chris.apexvr.apexGL.shader.GLProgram;
 import com.example.chris.apexvr.apexGL.shader.Shader;
 import com.example.chris.apexvr.apexGL.shader.Shadow;
-import com.example.chris.apexvr.apexGL.shader.Texture;
 import com.example.chris.apexvr.apexGL.world.GroundCreater;
 import com.google.vr.sdk.audio.GvrAudioEngine;
 import com.google.vr.sdk.base.Eye;
