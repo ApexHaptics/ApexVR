@@ -109,17 +109,17 @@ public class GroundCreater {
     }
 
     public float[] normal(float x, float y){
-        float xCLose = (x / width + 0.5f) * lastIndex;
-        float yCLose = (y / width + 0.5f) * lastIndex;
+        float xCLose = (x / size + 0.5f) * lastIndex;
+        float yCLose = (y / size + 0.5f) * lastIndex;
 
-        int xLower = clamp((int)((x / width + 0.5f) * lastIndex),0,lastIndex);
-        int yLower = clamp((int)((y / width + 0.5f) * lastIndex),0,lastIndex);
+        int xLower = clamp((int)xCLose,0,lastIndex);
+        int yLower = clamp((int)yCLose,0,lastIndex);
 
-        int xUpper = clamp((int)((x / width + 0.5f) * lastIndex + 0.5f),0,lastIndex);
-        int yUpper = clamp((int)((y / width + 0.5f) * lastIndex + 0.5f),0,lastIndex);
+        int xUpper = clamp((int)(xCLose + 1.0f),0,lastIndex);
+        int yUpper = clamp((int)(yCLose + 1.0f),0,lastIndex);
 
-        float xScale = (xCLose % edge) / edge;
-        float yScale = (yCLose % edge) / edge;
+        float xScale = (float) (xCLose - Math.floor(xCLose));
+        float yScale = (float) (yCLose - Math.floor(yCLose));
 
         float[] normal = new float[3];
 
