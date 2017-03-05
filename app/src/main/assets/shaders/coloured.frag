@@ -6,7 +6,7 @@ in vec3 LightDir;
 in vec4 FragPos;
 in vec4 ShadowCord;
 
-uniform sampler2D depthMap;
+uniform sampler2DShadow depthMap;
 
 layout(location = 0) out vec4 diffuseColor;
 
@@ -26,39 +26,19 @@ float groundStrength = 0.2f;
 float ambientStrength = 1.0f;
 float fogConstant = 0.01f;
 
-float texture2DCompare(sampler2D depths, vec2 uv, float compare){
-    float depth = texture(depths, uv).r;
-    return step(compare, depth);
-}
-
-float texture2DShadowLerp(sampler2D depths, vec2 size, vec2 uv, float compare){
-    vec2 texelSize = vec2(1.0)/size;
-    vec2 f = fract(uv*size+0.5);
-    vec2 centroidUV = floor(uv*size+0.5)/size;
-
-    float lb = texture2DCompare(depths, centroidUV+texelSize*vec2(0.0, 0.0), compare);
-    float lt = texture2DCompare(depths, centroidUV+texelSize*vec2(0.0, 1.0), compare);
-    float rb = texture2DCompare(depths, centroidUV+texelSize*vec2(1.0, 0.0), compare);
-    float rt = texture2DCompare(depths, centroidUV+texelSize*vec2(1.0, 1.0), compare);
-    float a = mix(lb, lt, f.y);
-    float b = mix(rb, rt, f.y);
-    float c = mix(a, b, f.x);
-    return c;
-}
-
 vec2 mod7(vec2 x) {
   return x - floor(x / 7.0f) * 7.0;
 }
 
-float PCF(sampler2D depths, vec2 size, vec2 uv, float compare){
-    float result = 0.0;
-    for(int x=-1; x<=1; x++){
-        for(int y=-1; y<=1; y++){
-            vec2 off = (vec2(x,y) + (mod7(vec2(x,y)  + uv) - 3.5f)*2.0f)/size;
-            result += texture2DShadowLerp(depths, size, uv+off, compare);
-        }
-    }
-    return result/9.0;
+float offset_lookup(sampler2DShadow depths, vec4 loc, vec2 offset, vec2 texmapscale) {
+    return textureProj(depths, vec4(loc.xy + offset*texmapscale*loc.w, loc.zw));
+}
+
+float PCF(sampler2DShadow depths, vec4 ShadowCord, vec2 texmapscale){
+    return (offset_lookup(depths, ShadowCord, vec2(-1.5,0.5), texmapscale) +
+            offset_lookup(depths, ShadowCord, vec2(0.5,0.5), texmapscale) +
+            offset_lookup(depths, ShadowCord, vec2(-1.5,-1.5), texmapscale) +
+            offset_lookup(depths, ShadowCord, vec2(0.5,-1.5), texmapscale)) * 0.25;
 }
 
 void main(){
@@ -77,9 +57,9 @@ void main(){
 
     float shadowBias = max(0.05f * (1.0f - nDotL), 0.005f);
 
-
-
-    sun = sun * PCF(depthMap, vec2(textureSize(depthMap, 0)), ShadowCord.xy,ShadowCord.z - shadowBias);
+    vec2 texmapscale = 1.0f/vec2(textureSize(depthMap, 0));
+    sun = sun * PCF(depthMap, ShadowCord - vec4(0,0,shadowBias,0), texmapscale);
+    //sun = sun * texture(depthMap, vec3(ShadowCord.xy, ShadowCord.z - shadowBias));
 
 
     float d = sqrt(FragPos.z*FragPos.z+FragPos.x*FragPos.x+FragPos.y*FragPos.y);
