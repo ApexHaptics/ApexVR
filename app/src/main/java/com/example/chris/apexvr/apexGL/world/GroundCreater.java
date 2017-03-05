@@ -14,44 +14,74 @@ import java.util.Random;
 
 public class GroundCreater {
     private int width;
+    private int lastIndex;
     private float[][] grid;
     private float edge;
     private float size;
 
+    private static final float[] GRASS_COLOUR = {0.3906f, 0.5547f, 0.3477f};
+    private static final float[] STONE_COLOUR = {0.5156f, 0.4805f, 0.4805f};
+
     public GroundCreater(float size, int width){
-        grid = new float[width][width];
-        edge = size / width;
+
         this.width = width;
+        lastIndex = width - 1;
         this.size = size;
+
+        grid = new float[width][width];
+        edge = size / lastIndex;
     }
 
     public ColouredInterleavedMesh getMesh(){
         FloatBuffer vertexes = FloatBuffer.allocate(9*width*width);
-        IntBuffer indexes = IntBuffer.allocate(2* (width - 1) * (width - 1));
+        IntBuffer indexes = IntBuffer.allocate(2 * 3 * lastIndex * lastIndex);
 
         float half = size/2.0f;
 
         for(int x = 0; x < width; ++x) {
             for (int y = 0; y < width; ++y) {
                 vertexes.put(x * edge - half);
-                vertexes.put(y * edge - half);
+                vertexes.put(grid[x][y]);
                 vertexes.put(y * edge - half);
                 vertexes.put(normal(x,y));
-                if(gradient(x,y) > 0.6f){
-
+                //vertexes.put(normal(x,y));
+                if(gradient(x,y) > 0.5f){
+                    vertexes.put(STONE_COLOUR);
+                }else{
+                    vertexes.put(GRASS_COLOUR);
                 }
             }
         }
+
+        for(int x = 0; x < lastIndex; ++x) {
+            for (int y = 0; y < lastIndex; ++y) {
+                indexes.put(x * width + y);
+                indexes.put(x * width + y + 1);
+                indexes.put((x+1) * width + y + 1);
+
+                indexes.put((x+1) * width + y + 1);
+                indexes.put((x+1) * width + y);
+                indexes.put(x * width + y);
+            }
+        }
+
+
+        vertexes.rewind();
+        indexes.rewind();
 
         return new ColouredInterleavedMesh(vertexes, indexes);
     }
 
 
     public float interpolate(float x, float y){
-        int xUpper = (int)clamp((x / size + 1.0f) * width + 0.5f, 0.0f, size);
-        int xLower = (int)clamp((x / size) * width + 0.5f, 0.0f, size);
-        int yUpper = (int)clamp((y / size + 1.0f) * width + 0.5f, 0.0f, size);
-        int yLower = (int)clamp((y / size) * width, 0.0f, size);
+        float xCLose = (x / width + 0.5f) * lastIndex;
+        float yCLose = (y / width + 0.5f) * lastIndex;
+
+        int xLower = clamp((int)((x / width + 0.5f) * lastIndex),0,lastIndex);
+        int yLower = clamp((int)((y / width + 0.5f) * lastIndex),0,lastIndex);
+
+        int xUpper = clamp(xLower + 1,0,lastIndex);
+        int yUpper = clamp(yLower + 1,0,lastIndex);
 
         float xScale = (x % edge) / edge;
         float yScale = (y % edge) / edge;
@@ -63,8 +93,8 @@ public class GroundCreater {
     }
 
     public float gradient(int x, int y){
-        float delta1 = (grid[clamp(x-1,0,width)][y] - grid[clamp(x+1,0,width)][y]) / edge;
-        float delta2 = (grid[x][clamp(y-1,0,width)] - grid[x][clamp(y+1,0,width)]) / edge;
+        float delta1 = (grid[clamp(x-1,0,lastIndex)][y] - grid[clamp(x+1,0,lastIndex)][y]) / edge;
+        float delta2 = (grid[x][clamp(y-1,0,lastIndex)] - grid[x][clamp(y+1,0,lastIndex)]) / edge;
 
         return (float) Math.sqrt(delta1*delta1 + delta2*delta2);
     }
@@ -81,8 +111,8 @@ public class GroundCreater {
     public float[] normal(int x, int y){
         float[] normal = new float[3];
 
-        float delta1 = grid[clamp(x-1,0,width)][y] - grid[clamp(x+1,0,width)][y];
-        float delta2 = grid[x][clamp(y-1,0,width)] - grid[x][clamp(y+1,0,width)];
+        float delta1 = grid[clamp(x-1,0,lastIndex)][y] - grid[clamp(x+1,0,lastIndex)][y];
+        float delta2 = grid[x][clamp(y-1,0,lastIndex)] - grid[x][clamp(y+1,0,lastIndex)];
 
         normal[0] = delta1;
         normal[1] = edge * edge;
@@ -96,37 +126,40 @@ public class GroundCreater {
 
         scalar = (float) Math.sqrt(scalar);
 
-        for(float comp: normal){
-            comp /= scalar;
+        for(int i = 0; i < 3; ++i){
+            normal[i] /= scalar;
         }
 
         return normal;
 
     }
 
-    public void perturb(float largest, float smallest, float highest, float lowest){
-        float step = (largest - smallest) / 10.0f;
-        float b = (float) (Math.log(highest - lowest) / (largest - smallest));
+    public void perturb(float largest, float smallest){
+
+        int N = 10;
+        int B = 10;
+
+        float b = (largest - smallest) / (N - 1);
 
         Random random = new Random();
 
-        for(float size = largest; size > smallest; size -= step){
-            float dhm = highest - (float)Math.exp(largest-size * b);
-            for(int i =  0; i < 10; ++i){
+        for(int size = N; size > 0; --size){
+            float dhm = size * b;
+
+            for(int i =  0; i < B * (N - size - 1); ++i){
                 float cx = random.nextFloat();
                 float cy = random.nextFloat();
-                float h = random.nextFloat() * dhm;
-                float k = random.nextFloat() + 0.2f;
-                float l = h * (3.0f * random.nextFloat() + 1.0f);
+                float k = 20.0f * random.nextFloat() + 20.0f;
+                float l = size / N;
 
                 for(int x = 0; x < width; ++x){
                     for(int y = 0; y < width; ++y){
-                        float dx = x/width - cx;
-                        float dy = y/width - cy;
+                        float dx = ((float)x)/lastIndex - cx;
+                        float dy = ((float)y)/lastIndex - cy;
 
-                        float dist = (float) Math.sqrt(dx*dx - dy*dy);
+                        float dist = (float) Math.sqrt(dx*dx + dy*dy);
 
-                        grid[x][y] += h / (1.0f + Math.exp(-k * (dist - l)));
+                        grid[x][y] += dhm / (1.0f + Math.exp(-k * (l - dist)));
 
                     }
                 }

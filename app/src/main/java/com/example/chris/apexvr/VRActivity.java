@@ -17,6 +17,7 @@ import com.example.chris.apexvr.apexGL.shader.GLProgram;
 import com.example.chris.apexvr.apexGL.shader.Shader;
 import com.example.chris.apexvr.apexGL.shader.Shadow;
 import com.example.chris.apexvr.apexGL.shader.Texture;
+import com.example.chris.apexvr.apexGL.world.GroundCreater;
 import com.google.vr.sdk.audio.GvrAudioEngine;
 import com.google.vr.sdk.base.Eye;
 import com.google.vr.sdk.base.GvrActivity;
@@ -141,24 +142,23 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
             e.printStackTrace();
             throw new RuntimeException("Could not open matlib file: matlibs/graound.mtl");
         }
-        /*
-
-        //shadows
-        Shadow shadows = new Shadow(shadowProgram,
-                LIGHT_DIR_IN_WORLD_SPACE,
-                new Shadow.BoundingBox(new float[]{0.0f,0.0f,0.0f},new float[]{120.0f,120.0f,20.0f}));
-                */
 
 
         shadows = new Shadow(shadowProgram,
                 LIGHT_DIR_IN_WORLD_SPACE,
                 new Shadow.BoundingBox(new float[]{0.0f,0.0f,0.0f},new float[]{120.0f,120.0f,20.0f}));
 
+
+        GroundCreater groundCreater = new GroundCreater(120.0f,200);
+        groundCreater.perturb(5.0f,0.1f);
+
+        float groudAtZero = groundCreater.interpolate(0.0f,0.0f);
+
         //Meshes
         try {
             ColouredInterleavedMesh colouredMesh = ColouredInterleavedMesh.importOBJInterleavedMesh(getAssets().open("meshes/ground.obj"),matLib);
-            ColouredStaticObject ground = new ColouredStaticObject(colProgram,colouredMesh);
-            Matrix.translateM(ground.getOrientation(), 0, 0, -3.0f, 0);
+            ColouredStaticObject ground = new ColouredStaticObject(colProgram,groundCreater.getMesh());
+            Matrix.translateM(ground.getOrientation(),0,0.0f,-groudAtZero,0.0f);
             ground.setCastingShadow(true);
             ground.addExtention(shadows);
             glObjects.add(ground);
@@ -170,7 +170,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         try {
             VertexMesh mesh = VertexMesh.importOBJInterleavedMesh(getAssets().open("meshes/sky.obj"));
             VertexObject sky = new VertexObject(skyProgram,mesh);
-            Matrix.translateM(sky.getOrientation(), 0, 0, -6.0f, 0);
+            Matrix.translateM(sky.getOrientation(),0,0.0f,-groudAtZero,0.0f);
             glObjects.add(sky);
         } catch (IOException e) {
             e.printStackTrace();
@@ -180,6 +180,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         try {
             ColouredInterleavedMesh colouredMesh = ColouredInterleavedMesh.importOBJInterleavedMesh(getAssets().open("meshes/tree.obj"),matLib);
             MultiCSObject tree = new MultiCSObject(colProgram,colouredMesh);
+            Matrix.translateM(tree.getOrientation(),0,0.0f,-groudAtZero,0.0f);
             tree.setCastingShadow(true);
             tree.addExtention(shadows);
 
@@ -192,21 +193,22 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
 
             for(float i = -50; i < 50; i += 4){
                 for(float j = -50; j < 50; j += 4){
-                    if((i*i + j*j > 100.0f) && random.nextFloat() > 0.7){
+                    float dist2 = i*i + j*j;
+                    if(dist2 > 100.0f && dist2 < 3600.0f && random.nextFloat() > 0.6){
 
-                        float rotation = (float) Math.sin(random.nextDouble() * Math.PI / 2);
-                        Matrix.rotateM(sub,0,eye,0,rotation,0,1-rotation,0);
+                        float xPos = i-1.6f+3.2f*random.nextFloat();
+                        float zPos = j-1.6f+3.2f*random.nextFloat();
+                        float yPos = groundCreater.interpolate(xPos,zPos);
+
+                        Matrix.translateM(sub,0,eye,0,xPos,yPos,zPos);
+
+                        float rotation = random.nextFloat() * 360.0f;
+                        Matrix.rotateM(sub,0,rotation,0,1.0f,0);
+
 
                         float xzScale = random.nextFloat()*0.5f + 0.75f;
                         float yScale = random.nextFloat()*0.5f + 0.75f;
                         Matrix.scaleM(sub,0,xzScale,yScale,xzScale);
-
-
-                        Matrix.translateM(sub,0,
-                                i-2.0f+4*random.nextFloat(),
-                                -2.6f,
-                                j-2.0f+4*random.nextFloat());
-
 
 
                         tree.addSubObject(sub.clone());
@@ -253,6 +255,8 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
 
         GLES30.glCullFace(GLES30.GL_FRONT);
 
+        //Matrix.setLookAtM(mCamera, 0, 0.0f, 1.8034f, 0.0f, 1.8034f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f);
+
 
         GLError.checkGLError(TAG,"Surface created");
 
@@ -297,8 +301,11 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         //Matrix.rotateM(glObjects.get(1).getOrientation(), 0, 0.3f, 0.5f, 0.5f, 1.0f);
 
         //Matrix.translateM(cube.getOrientation(), 0, 0, -0.1f,0);
-        Matrix.setLookAtM(mCamera, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f);
+
         //shadows.createStaticShadowMap(glObjects);
+
+        Matrix.setIdentityM(mCamera,0);
+        Matrix.translateM(mCamera,0,0.0f,-1.8f,0.0f);
 
     }
 

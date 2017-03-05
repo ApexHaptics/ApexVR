@@ -18,7 +18,7 @@ public class Shadow implements LightingExtention {
 
     private static final String TAG = "Shadows";
     //private static final int TEXTURE_DIM = 1024;
-    private static final int TEXTURE_DIM = 2048;
+    private static final int TEXTURE_DIM = 4096;
     private static final float[] SCREEN_BIAS = new float[]{
             0.5f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.5f, 0.0f, 0.0f,
