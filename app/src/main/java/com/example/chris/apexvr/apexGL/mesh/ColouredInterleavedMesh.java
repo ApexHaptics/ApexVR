@@ -21,7 +21,7 @@ public class ColouredInterleavedMesh extends Mesh {
         this.vertices = vertices;
     }
 
-    private ColouredInterleavedMesh(MeshConstructionData meshData){
+    protected ColouredInterleavedMesh(MeshConstructionData meshData){
 
 
         float[] vertices = new float[meshData.nVertices * FLOAT_STRIDE];
@@ -33,7 +33,7 @@ public class ColouredInterleavedMesh extends Mesh {
 
     }
 
-    private static void addVertex(float[] vertices, MeshVertex meshNode){
+    protected static void addVertex(float[] vertices, MeshVertex meshNode){
 
         System.arraycopy(meshNode.vertex,0,vertices,meshNode.index*FLOAT_STRIDE,3);
         System.arraycopy(meshNode.normal,0,vertices,meshNode.index*FLOAT_STRIDE+3,3);

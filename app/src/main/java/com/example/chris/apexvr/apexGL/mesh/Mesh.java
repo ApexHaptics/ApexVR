@@ -1,7 +1,5 @@
 package com.example.chris.apexvr.apexGL.mesh;
 
-import android.content.res.AssetFileDescriptor;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -125,7 +123,7 @@ public abstract class Mesh {
                                 if (options.useNormal) face[2] = Integer.parseInt(vis[2]) - 1;
 
                             }catch (NumberFormatException e){
-                                throw new IOException("Missing data in farce: " + line);
+                                throw new IOException("Missing data in face: " + line);
                             }
 
                             faceVerts.add(face);

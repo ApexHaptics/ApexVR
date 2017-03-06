@@ -41,9 +41,14 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
 
     private static final float[] LIGHT_DIR_IN_WORLD_SPACE = new float[] {0.0f, 0.70710678118f, 0.70710678118f};
 
+    private static final float RAD_TO_DEG = (float) (180.0f / Math.PI);
+
     private GvrAudioEngine gvrAudioEngine;
 
-    private float[] mCamera = new float[16];
+    private float[] headPos;
+    private float[] headRotation;
+
+
 
     Shadow shadows;
 
@@ -57,6 +62,11 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         setContentView(R.layout.activity_vr);
 
         Log.i(TAG, "Starting");
+
+        headPos = new float[3];
+        headRotation = new float[4];
+
+        headPos[1] = 1.8f;
 
 
         gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
@@ -147,6 +157,18 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
             e.printStackTrace();
             throw new RuntimeException("Could not open matlib file: matlibs/graound.mtl");
         }
+        try {
+            matLib.addMatLib(getAssets().open("matlibs/table.mtl"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Could not open matlib file: matlibs/graound.mtl");
+        }
+        try {
+            matLib.addMatLib(getAssets().open("matlibs/pillar.mtl"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Could not open matlib file: matlibs/graound.mtl");
+        }
 
 
         shadows = new Shadow(shadowProgram,
@@ -157,21 +179,38 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         GroundCreater groundCreater = new GroundCreater(240.0f,200);
 
 
-        groundCreater.perturb(5.0f,1.0f,6,6);
+        //groundCreater.perturb(5.0f,0.5f,6,6);
 
-        float groudAtZero = groundCreater.interpolate(0.0f,0.0f);
+        float groudAtZero = groundCreater.maxHight(1.5f) + 0.5f;
 
-        //Meshes
+        ColouredStaticObject ground = new ColouredStaticObject(colProgram,groundCreater.getMesh());
+        Matrix.translateM(ground.getOrientation(),0,0.0f,-groudAtZero,0.0f);
+        ground.setCastingShadow(true);
+        ground.addExtention(shadows);
+        glObjects.add(ground);
+
+
         try {
-            ColouredInterleavedMesh colouredMesh = ColouredInterleavedMesh.importOBJInterleavedMesh(getAssets().open("meshes/ground.obj"),matLib);
-            ColouredStaticObject ground = new ColouredStaticObject(colProgram,groundCreater.getMesh());
-            Matrix.translateM(ground.getOrientation(),0,0.0f,-groudAtZero,0.0f);
-            ground.setCastingShadow(true);
-            ground.addExtention(shadows);
-            glObjects.add(ground);
+            ColouredInterleavedMesh mesh = ColouredInterleavedMesh.importOBJInterleavedMesh(getAssets().open("meshes/pillar.obj"),matLib);
+            ColouredStaticObject platform = new ColouredStaticObject(colProgram,mesh);
+            platform.setCastingShadow(true);
+            platform.addExtention(shadows);
+            glObjects.add(platform);
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("Could not open obj file: meshes/ground.obj");
+            throw new RuntimeException("Could not open obj file: meshes/pillar.obj");
+        }
+
+        try {
+            ColouredInterleavedMesh mesh = ColouredInterleavedMesh.importOBJInterleavedMesh(getAssets().open("meshes/table.obj"),matLib);
+            ColouredStaticObject table = new ColouredStaticObject(colProgram,mesh);
+            Matrix.translateM(table.getOrientation(),0,1.0f,0.0f,0.0f);
+            table.setCastingShadow(true);
+            table.addExtention(shadows);
+            glObjects.add(table);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Could not open obj file: meshes/table.obj");
         }
 
         try {
@@ -212,7 +251,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
                         float[] normal = groundCreater.normal(xPos,zPos);
                         float normalAngle = (float) ((float) Math.acos(normal[1])/Math.PI*180.0f);
 
-                        if(normalAngle > 15)
+                        if(normalAngle > 30)
                             continue;
 
                         Matrix.translateM(sub,0,eye,0,xPos,yPos,zPos);
@@ -252,18 +291,18 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
             Matrix.setIdentityM(eye,0);
 
             for(int i = 0; i < 75; ++i){
-                float r = 2.0f + 18.0f * random.nextFloat();
+                float r = 2.0f + 20.0f * random.nextFloat();
                 float angle = (float) (2.0 * Math.PI * random.nextFloat());
 
                 float xPos = (float) (Math.cos(angle) * r);
                 float zPos = (float) (Math.sin(angle) * r);
-                float yPos = groundCreater.interpolate(xPos,zPos) + 0.3f;
+                float yPos = groundCreater.interpolate(xPos,zPos) + 0.05f;
                 Matrix.translateM(sub,0,eye,0,xPos,yPos,zPos);
 
                 float[] normal = groundCreater.normal(xPos,zPos);
                 float normalAngle = (float) ((float) Math.acos(normal[1])/Math.PI*180.0f);
 
-                if(normalAngle > 15)
+                if(normalAngle > 60)
                     continue;
 
                 if(normalAngle > 0.001)
@@ -330,54 +369,31 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
 
         Log.i(TAG, "Creating Surface Done");
 
-    }
-    /*
-    public void testObjects(){
-        try {
-            Texture texture = Texture.loadTexture(getAssets().openFd("tex/dot_cube.png"));
-            TexturedStaticObject cube;
-            TexturedInterleavedMesh mesh = TexturedInterleavedMesh.importOBJInterleavedMesh(getAssets().open("meshes/cube.obj"));
-            cube = new TexturedStaticObject(texProgram,mesh,texture);
-            Matrix.translateM(cube.getOrientation(), 0, 0, -5.0f,0);
-            glObjects.add(cube);
-        } catch (IOException e) {
-            Log.e(TAG,"Could not open obj file: " + e.toString());
-            throw new RuntimeException("Could not open obj file: " + e.toString());
-        }
+        Matrix.setIdentityM(viewRot,0);
 
-        try {
-            Texture texture = Texture.loadTexture(getAssets().openFd("tex/poke_ball.png"));
-            TexturedStaticObject pBall;
-            TexturedInterleavedMesh mesh = TexturedInterleavedMesh.importOBJInterleavedMesh(getAssets().open("meshes/cyl.obj"));
-            pBall = new TexturedStaticObject(texProgram, mesh, texture);
-            Matrix.translateM(pBall.getOrientation(), 0, 0, 0, -5.0f);
-            glObjects.add(pBall);
-        } catch (IOException e) {
-            Log.e(TAG, "Could not open obj file: " + e.toString());
-            throw new RuntimeException("Could not open obj file: " + e.toString());
-        }
     }
-    */
+
+    float[] viewRot = new float[16];
 
 
 
     @Override
     public void onNewFrame(HeadTransform headTransform) {
 
-        //Matrix.rotateM(glObjects.get(0).getOrientation(), 0, 0.3f, 0.5f, 0.5f, 1.0f);
-        //Matrix.rotateM(glObjects.get(1).getOrientation(), 0, 0.3f, 0.5f, 0.5f, 1.0f);
+        headTransform.getHeadView(viewRot,0);
 
-        //Matrix.translateM(cube.getOrientation(), 0, 0, -0.1f,0);
+        for(int i = 12; i < 15; ++i){
+            viewRot[i] = 0.0f;
+        }
 
-        //shadows.createStaticShadowMap(glObjects);
 
-        Matrix.setIdentityM(mCamera,0);
-        Matrix.translateM(mCamera,0,0.0f,-1.8f,0.0f);
 
     }
 
     @Override
     public void onDrawEye(Eye eye) {
+
+
 
         //shadows.createStaticShadowMap(glObjects);
 
@@ -391,10 +407,22 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
 
         GLError.checkGLError(TAG,"colorParam");
 
-
         float[] view = new float[16];
+        float[] viewTran = new float[16];
+        float[] eyeTran = new float[16];
 
-        Matrix.multiplyMM(view, 0,eye.getEyeView(), 0, mCamera, 0);
+
+        float[] rh = new float[16];
+
+        Matrix.setIdentityM(viewTran,0);
+        Matrix.translateM(viewTran,0,-headPos[0],-headPos[1],-headPos[2]);
+
+        Matrix.setIdentityM(eyeTran,0);
+        Matrix.translateM(eyeTran,0,(eye.getType() == Eye.Type.LEFT)?-0.03f:0.03f,0.0f,0.0f);
+
+        Matrix.multiplyMM(rh,0,viewRot,0,viewTran,0);
+        Matrix.multiplyMM(view,0,eyeTran,0,rh,0);
+
 
         float[] perspective = eye.getPerspective(Z_NEAR, Z_FAR);
 

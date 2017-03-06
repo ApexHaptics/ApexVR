@@ -164,12 +164,18 @@ public class GroundCreater {
     }
 
     public float maxHight(float radius){
-        float max = 0;
+        float max = interpolate(0,0);
 
         for(int x = 0; x <= lastIndex; ++x) {
             for (int y = 0; y <= lastIndex; ++y) {
                 float px = x * edge - size / 2;
                 float py = y * edge - size / 2;
+
+                if(px*px + py*py < radius*radius){
+                    if(grid[x][y] > max){
+                        max = grid[x][y];
+                    }
+                }
             }
         }
 
