@@ -1,7 +1,5 @@
 package com.example.chris.apexvr.apexGL.world;
 
-import android.util.FloatMath;
-
 import com.example.chris.apexvr.apexGL.mesh.ColouredInterleavedMesh;
 
 import java.nio.FloatBuffer;
@@ -20,7 +18,7 @@ public class GroundCreater {
     private float size;
 
     private static final float[] GRASS_COLOUR = {0.094625f, 0.063519f, 0.018978f};
-    private static final float[] STONE_COLOUR = {0.3164f, 0.3047f, 0.2734f};
+    private static final float[] STONE_COLOUR = {0.018f, 0.013f, 0.08f};
 
     public GroundCreater(float size, int width){
 
@@ -165,8 +163,21 @@ public class GroundCreater {
 
     }
 
+    public float maxHight(float radius){
+        float max = 0;
+
+        for(int x = 0; x <= lastIndex; ++x) {
+            for (int y = 0; y <= lastIndex; ++y) {
+                float px = x * edge - size / 2;
+                float py = y * edge - size / 2;
+            }
+        }
+
+        return max;
+    }
+
     public void perturb(float largest, float smallest){
-        perturb(largest,smallest,8,8);
+        perturb(largest,smallest,8,3);
     }
 
     public void perturb(float largest, float smallest, int N, int B){
@@ -177,15 +188,24 @@ public class GroundCreater {
 
         for(int size = N; size > 0; --size){
             float dhm = size * b;
+            float l = (float)size / N / 2.0f;
 
-            for(int i =  0; i < B * (N - size - 1); ++i){
-                float cx = random.nextFloat();
-                float cy = random.nextFloat();
+            for(int i =  0; i < B * (N - size + 1); ++i){
+                float cx = 6.0f * l * random.nextFloat() - 3.0f * l;
+                float cy = 6.0f * l * random.nextFloat() - 3.0f * l;
                 float k = 20.0f * random.nextFloat() + 20.0f;
-                float l = size / N;
 
-                for(int x = 0; x < width; ++x){
-                    for(int y = 0; y < width; ++y){
+
+
+                int xLower = 0;
+                int xUpper = lastIndex;
+
+                int yLower = 0;
+                int yUpper = lastIndex;
+
+
+                for(int x = xLower; x <= xUpper; ++x){
+                    for(int y = yLower; y <= yUpper; ++y){
                         float dx = ((float)x)/lastIndex - cx;
                         float dy = ((float)y)/lastIndex - cy;
 
@@ -197,6 +217,13 @@ public class GroundCreater {
                 }
             }
         }
+
+        float center = 8.0f;
+
+        int lower = (int) (width / 2.0f - center / edge);
+        int upper = (int) (width / 2.0f - center / edge);
+
+
     }
 
      private float clamp(float x, float min, float max){

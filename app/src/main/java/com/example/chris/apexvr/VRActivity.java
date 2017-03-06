@@ -35,7 +35,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
 
     private static final float Z_NEAR = 0.1f;
-    private static final float Z_FAR = 100.0f;
+    private static final float Z_FAR = 130.0f;
 
     private static final String TAG = "ApexVR_VRA";
 
@@ -154,9 +154,10 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
                 new Shadow.BoundingBox(new float[]{0.0f,0.0f,0.0f},new float[]{120.0f,120.0f,20.0f}));
 
 
-        GroundCreater groundCreater = new GroundCreater(120.0f,200);
-        groundCreater.perturb(5.0f,0.5f);
-        //groundCreater.perturb(5.0f,0.1f,4,1);
+        GroundCreater groundCreater = new GroundCreater(240.0f,200);
+
+
+        groundCreater.perturb(5.0f,1.0f,6,6);
 
         float groudAtZero = groundCreater.interpolate(0.0f,0.0f);
 
@@ -177,6 +178,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
             VertexMesh mesh = VertexMesh.importOBJInterleavedMesh(getAssets().open("meshes/sky.obj"));
             VertexObject sky = new VertexObject(skyProgram,mesh);
             Matrix.translateM(sky.getOrientation(),0,0.0f,-groudAtZero,0.0f);
+            Matrix.scaleM(sky.getOrientation(),0,2,2,2);
             glObjects.add(sky);
         } catch (IOException e) {
             e.printStackTrace();
@@ -198,14 +200,20 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
             Matrix.setIdentityM(eye,0);
 
 
-            for(float i = -50; i < 50; i += 4){
-                for(float j = -50; j < 50; j += 4){
+            for(float i = -110; i < 110; i += 6){
+                for(float j = -110; j < 110; j += 6){
                     float dist2 = i*i + j*j;
-                    if(dist2 > 100.0f && dist2 < 3600.0f && random.nextFloat() > 0.6){
+                    if(dist2 > 100.0f && dist2 < 12100.0f && random.nextFloat() > 0.4f + 0.4f * dist2 / 12100.0f){
 
                         float xPos = i-1.6f+3.2f*random.nextFloat();
                         float zPos = j-1.6f+3.2f*random.nextFloat();
                         float yPos = groundCreater.interpolate(xPos,zPos);
+
+                        float[] normal = groundCreater.normal(xPos,zPos);
+                        float normalAngle = (float) ((float) Math.acos(normal[1])/Math.PI*180.0f);
+
+                        if(normalAngle > 15)
+                            continue;
 
                         Matrix.translateM(sub,0,eye,0,xPos,yPos,zPos);
 
@@ -249,11 +257,17 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
 
                 float xPos = (float) (Math.cos(angle) * r);
                 float zPos = (float) (Math.sin(angle) * r);
-                float yPos = groundCreater.interpolate(xPos,zPos);
+                float yPos = groundCreater.interpolate(xPos,zPos) + 0.3f;
                 Matrix.translateM(sub,0,eye,0,xPos,yPos,zPos);
 
                 float[] normal = groundCreater.normal(xPos,zPos);
-                Matrix.rotateM(sub,0, (float) ((float) Math.acos(normal[1])/Math.PI*180.0f),normal[2],0.0f,-normal[0]);
+                float normalAngle = (float) ((float) Math.acos(normal[1])/Math.PI*180.0f);
+
+                if(normalAngle > 15)
+                    continue;
+
+                if(normalAngle > 0.001)
+                    Matrix.rotateM(sub,0,normalAngle ,normal[2],0.0f,-normal[0]);
 
                 float rotation = random.nextFloat() * 360.0f;
                 Matrix.rotateM(sub,0,rotation,0,1.0f,0);
