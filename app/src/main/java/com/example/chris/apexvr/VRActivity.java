@@ -179,7 +179,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         GroundCreater groundCreater = new GroundCreater(240.0f,200);
 
 
-        //groundCreater.perturb(5.0f,0.5f,6,6);
+        groundCreater.perturb(5.0f,0.5f,6,6);
 
         float groudAtZero = groundCreater.maxHight(1.5f) + 0.5f;
 
