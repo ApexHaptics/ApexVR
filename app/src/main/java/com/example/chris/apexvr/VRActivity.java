@@ -155,7 +155,8 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
 
 
         GroundCreater groundCreater = new GroundCreater(120.0f,200);
-        groundCreater.perturb(5.0f,0.1f);
+        groundCreater.perturb(5.0f,0.5f);
+        //groundCreater.perturb(5.0f,0.1f,4,1);
 
         float groudAtZero = groundCreater.interpolate(0.0f,0.0f);
 
@@ -251,22 +252,15 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
                 float yPos = groundCreater.interpolate(xPos,zPos);
                 Matrix.translateM(sub,0,eye,0,xPos,yPos,zPos);
 
-                /*
+                float[] normal = groundCreater.normal(xPos,zPos);
+                Matrix.rotateM(sub,0, (float) ((float) Math.acos(normal[1])/Math.PI*180.0f),normal[2],0.0f,-normal[0]);
 
                 float rotation = random.nextFloat() * 360.0f;
                 Matrix.rotateM(sub,0,rotation,0,1.0f,0);
-                */
-                /*
-
-                float[] normal = groundCreater.normal(xPos,zPos);
-                Matrix.setRotateM(sub,0, (float) Math.acos(normal[1]),normal[2],0.0f,-normal[0]);
-                */
-                /*
 
                 float xzScale = random.nextFloat()*0.5f + 0.75f;
                 float yScale = random.nextFloat()*0.5f + 0.75f;
                 Matrix.scaleM(sub,0,xzScale,yScale,xzScale);
-                */
 
                 grass.addSubObject(sub.clone());
 

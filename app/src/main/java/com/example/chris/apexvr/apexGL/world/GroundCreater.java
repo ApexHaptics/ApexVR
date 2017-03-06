@@ -166,9 +166,10 @@ public class GroundCreater {
     }
 
     public void perturb(float largest, float smallest){
+        perturb(largest,smallest,8,8);
+    }
 
-        int N = 10;
-        int B = 10;
+    public void perturb(float largest, float smallest, int N, int B){
 
         float b = (largest - smallest) / (N - 1);
 
