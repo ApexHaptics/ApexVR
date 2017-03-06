@@ -39,7 +39,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
 
     private static final String TAG = "ApexVR_VRA";
 
-    private static final float[] LIGHT_DIR_IN_WORLD_SPACE = new float[] {0.0f, 0.70710678118f, 0.70710678118f};
+    private static final float[] LIGHT_DIR_IN_WORLD_SPACE = new float[] {0.0f, 7.f/25.f, 24.f/25.f};
 
     private static final float RAD_TO_DEG = (float) (180.0f / Math.PI);
 

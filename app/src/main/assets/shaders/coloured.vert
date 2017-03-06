@@ -16,7 +16,7 @@ out vec3 LightDir;
 out vec4 FragPos;
 out vec4 ShadowCord;
 
-vec3 sun = normalize(vec3(0.0f,1.0f,1.0f));
+vec3 sun = normalize(vec3(0, 7, 24));
 
 
 void main()

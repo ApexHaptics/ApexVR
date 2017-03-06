@@ -18,13 +18,14 @@ vec3 ambientColour = vec3(0.016f, 0.007f, 0.007f);
 
 //vec4 fogColour = vec4(0.779f, 0.883f, 0.346f, 1.0f);
 
-vec3 fogColour = vec3(0.6f,0.6f,0.5f);
+vec3 fogColourBlue = vec3(0.5,0.6,0.7);
+vec3 fogColourYellow = vec3(1.0,0.9,0.7);
 
 float sunStrength = 2.24f;
 float skyStrength = 1.0f;
 float groundStrength = 0.2f;
 float ambientStrength = 1.0f;
-float fogConstant = 0.01f;
+float fogConstant = 0.005f;
 
 vec2 mod7(vec2 x) {
   return x - floor(x / 7.0f) * 7.0;
@@ -54,21 +55,23 @@ void main(){
     vec3 ground = dfground * groundColour * groundStrength;
     vec3 ambient = ambientColour * ambientStrength;
 
-
     float shadowBias = max(0.05f * (1.0f - nDotL), 0.005f);
 
     vec2 texmapscale = 1.0f/vec2(textureSize(depthMap, 0));
-    sun = sun * PCF(depthMap, ShadowCord - vec4(0,0,shadowBias,0), texmapscale);
+    float shadow = PCF(depthMap, ShadowCord - vec4(0,0,shadowBias,0), texmapscale);
+    sun = sun * pow( vec3(shadow), vec3(1.0, 1.2, 1.5) );
+
     //sun = sun * texture(depthMap, vec3(ShadowCord.xy, ShadowCord.z - shadowBias));
 
-
-    float d = sqrt(FragPos.z*FragPos.z+FragPos.x*FragPos.x+FragPos.y*FragPos.y);
-
-    float f = clamp(exp( - d * fogConstant),0.0f,1.0f);
+    float d = length(FragPos.xyz/FragPos.w);
+    float f = exp( - d * fogConstant);
+    float sunAmount = max( dot( normalize(FragPos.xyz), LightDir ), 0.0 );
+    vec3 fogColour = mix(fogColourBlue, fogColourYellow, pow(sunAmount, 8.0));
+    sun = sun + mix(vec3(0), sunColour, pow(sunAmount, 8.0));
 
     float c = length(vec2(FragPos));
 
-    vec3 colouring = Colour * (ambient + sun + sky + ground) * smoothstep(1.0f, 0.0f, (c-2.0f)/50.f);;
+    vec3 colouring = Colour * (ambient + sun + sky + ground) * smoothstep(1.0f, 0.0f, (c-2.0f)/50.f);
 
     diffuseColor = vec4(pow(mix(fogColour,colouring,f), vec3(1.0f/2.2f)),1.0f);
 
