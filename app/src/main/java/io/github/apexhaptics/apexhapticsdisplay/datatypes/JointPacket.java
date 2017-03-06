@@ -23,4 +23,6 @@ public class JointPacket extends BluetoothDataPacket {
     public Joint getJoint(Joint.JointType type) {
         return jointMap.get(type);
     }
+
+    public String getPacketString() { return packetString; }
 }

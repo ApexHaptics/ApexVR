@@ -12,4 +12,5 @@ public abstract class BluetoothDataPacket {
     BluetoothDataPacket() {
         createDate = new Date();
     }
+    public abstract String getPacketString();
 }

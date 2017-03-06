@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.Set;
 import java.util.UUID;
@@ -69,7 +71,7 @@ public class BluetoothService {
     public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
     public static final int STATE_CONNECTED = 3;  // now connected to a remote device
 
-    private ConcurrentLinkedQueue<BluetoothDataPacket> receivedData = new ConcurrentLinkedQueue<>();
+    private Map<String, ConcurrentLinkedQueue> dataPacketQueues = new HashMap<String, ConcurrentLinkedQueue>();
 
     /**
      * Constructor. Prepares a new BluetoothChat session.
@@ -106,12 +108,15 @@ public class BluetoothService {
         }
     }
 
-    public BluetoothDataPacket getLastPacket() {
-        return receivedData.poll();
+    public void registerPacketQueue(String packetString, ConcurrentLinkedQueue queue) {
+        dataPacketQueues.put(packetString, queue);
     }
 
-    public void registerPacketQueue(String packetString, ConcurrentLinkedQueue queue) {
-        
+    private void handlePacket(BluetoothDataPacket packet) {
+        ConcurrentLinkedQueue queue = dataPacketQueues.get(packet.getPacketString());
+        if (queue != null) {
+            queue.add(packet);
+        }
     }
 
     /**
@@ -499,7 +504,7 @@ public class BluetoothService {
                             Log.e(TAG, "Unknown packet type");
                             continue;
                     }
-                    receivedData.add(packet);
+                    handlePacket(packet);
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();
