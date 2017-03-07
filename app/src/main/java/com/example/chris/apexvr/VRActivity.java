@@ -17,6 +17,7 @@ import com.example.chris.apexvr.apexGL.shader.GLProgram;
 import com.example.chris.apexvr.apexGL.shader.Shader;
 import com.example.chris.apexvr.apexGL.shader.Shadow;
 import com.example.chris.apexvr.apexGL.world.GroundCreater;
+
 import com.google.vr.sdk.audio.GvrAudioEngine;
 import com.google.vr.sdk.base.Eye;
 import com.google.vr.sdk.base.GvrActivity;
@@ -30,6 +31,8 @@ import java.util.List;
 import java.util.Random;
 
 import javax.microedition.khronos.egl.EGLConfig;
+
+import io.github.apexhaptics.apexhapticsdisplay.BluetoothService;
 
 
 public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
@@ -54,6 +57,8 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
 
 
     private List<GLObject> glObjects = new ArrayList<>(10);
+
+    private BluetoothService myBluetoothService;
 
 
     @Override
@@ -82,6 +87,9 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
 
 
         Log.i(TAG, "Ready");
+
+        // Initialize Bluetooth
+        myBluetoothService = new BluetoothService(this.getApplicationContext());
     }
 
     @Override

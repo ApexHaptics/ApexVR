@@ -13,4 +13,6 @@ public class HeadPacket extends BluetoothDataPacket {
     public void addHead(float x, float y, float z, float angle) {
         Head head = new Head(x,y,z,angle);
     }
+
+    public String getPacketString() { return packetString; }
 }
