@@ -2,8 +2,10 @@ package com.example.chris.apexvr.kalman;
 
 import android.opengl.Matrix;
 
-import io.github.apexhaptics.apexhapticsdisplay.datatypes.Head;
+import io.github.apexhaptics.apexhapticsdisplay.datatypes.EndEffectorMarkerPacket;
+import io.github.apexhaptics.apexhapticsdisplay.datatypes.HeadPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.Joint;
+import io.github.apexhaptics.apexhapticsdisplay.datatypes.RobotKinPosPacket;
 
 /**
  * Created by Chris on 3/7/2017.
@@ -28,7 +30,15 @@ public class HeadKalman {
 
     }
 
-    public void updateSticker(Head head){
+    public void updateSticker(HeadPacket head){
+
+    }
+
+    public void updateEndEffectorFromMarker(EndEffectorMarkerPacket eefMarkerPacket){
+
+    }
+
+    public void updateRobotKinPos(RobotKinPosPacket kinPos){
 
     }
 

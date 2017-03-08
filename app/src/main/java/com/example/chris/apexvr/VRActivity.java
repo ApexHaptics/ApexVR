@@ -18,9 +18,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.microedition.khronos.egl.EGLConfig;
 
 import io.github.apexhaptics.apexhapticsdisplay.BluetoothService;
+import io.github.apexhaptics.apexhapticsdisplay.datatypes.EndEffectorMarkerPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.HeadPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.Joint;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.JointPacket;
+import io.github.apexhaptics.apexhapticsdisplay.datatypes.RobotKinPosPacket;
 
 
 public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
@@ -36,6 +38,8 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
     private BluetoothService myBluetoothService;
     private ConcurrentLinkedQueue<HeadPacket> headQueue;
     private ConcurrentLinkedQueue<JointPacket> jointQueue;
+    private ConcurrentLinkedQueue<EndEffectorMarkerPacket> endEffectorMarkerQueue;
+    private ConcurrentLinkedQueue<RobotKinPosPacket> robotKinPosQueue;
 
     private HeadKalman headKalman;
 
@@ -67,11 +71,15 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
 
         headQueue = new ConcurrentLinkedQueue<>();
         jointQueue = new ConcurrentLinkedQueue<>();
+        endEffectorMarkerQueue = new ConcurrentLinkedQueue<>();
+        robotKinPosQueue = new ConcurrentLinkedQueue<>();
 
         // Initialize Bluetooth
         myBluetoothService = new BluetoothService(this.getApplicationContext());
         myBluetoothService.registerPacketQueue(HeadPacket.packetString,headQueue);
         myBluetoothService.registerPacketQueue(JointPacket.packetString,jointQueue);
+        myBluetoothService.registerPacketQueue(EndEffectorMarkerPacket.packetString,endEffectorMarkerQueue);
+        myBluetoothService.registerPacketQueue(RobotKinPosPacket.packetString,robotKinPosQueue);
     }
 
     @Override
@@ -99,15 +107,20 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         headKalman.updateIMU(quaternion);
 
         if(!headQueue.isEmpty()){
-            headKalman.updateSticker(headQueue.poll().head);
+            headKalman.updateSticker(headQueue.poll());
         }
 
         if(!jointQueue.isEmpty()){
             headKalman.updateJoint(jointQueue.poll().getJoint(Joint.JointType.Head));
         }
 
+        if(!endEffectorMarkerQueue.isEmpty()){
+            headKalman.updateEndEffectorFromMarker(endEffectorMarkerQueue.poll());
+        }
 
-
+        if(!robotKinPosQueue.isEmpty()){
+            headKalman.updateRobotKinPos(robotKinPosQueue.poll());
+        }
     }
 
     @Override

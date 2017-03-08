@@ -21,7 +21,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
-import android.os.ParcelUuid;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -29,17 +28,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.Set;
 import java.util.UUID;
 
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.BluetoothDataPacket;
+import io.github.apexhaptics.apexhapticsdisplay.datatypes.EndEffectorMarkerPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.Joint;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.JointPacket;
-import io.github.apexhaptics.apexhapticsdisplay.datatypes.Head;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.HeadPacket;
+import io.github.apexhaptics.apexhapticsdisplay.datatypes.RobotKinPosPacket;
 
 import static android.util.Log.d;
 
@@ -117,10 +120,12 @@ public class BluetoothService {
         dataPacketQueues.put(packetString, queue);
     }
 
-    private void handlePacket(BluetoothDataPacket packet) {
-        ConcurrentLinkedQueue queue = dataPacketQueues.get(packet.getPacketString());
-        if (queue != null) {
-            queue.add(packet);
+    private void handlePackets(List<BluetoothDataPacket> packets) {
+        for (BluetoothDataPacket packet:packets) {
+            ConcurrentLinkedQueue queue = dataPacketQueues.get(packet.getPacketString());
+            if (queue != null) {
+                queue.add(packet);
+            }
         }
     }
 
@@ -495,13 +500,16 @@ public class BluetoothService {
 //                    mHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, buffer)
 //                            .sendToTarget();
                     packetData = mmBufferedReader.readLine().split(",");
-                    BluetoothDataPacket packet = null;
+                    List<BluetoothDataPacket> packets = null;
                     switch (packetData[0]) {
                         case JointPacket.packetString:
-                            packet = parseJointPacket(packetData);
+                            packets = parseJointPacket(packetData);
                             break;
                         case HeadPacket.packetString:
-                            packet = parseMarkerPacket(packetData);
+                            packets = parseMarkerPacket(packetData);
+                            break;
+                        case RobotKinPosPacket.packetString:
+                            packets = parseRobotKinPosPacket(packetData);
                             break;
                         case "":
                             continue;
@@ -509,7 +517,7 @@ public class BluetoothService {
                             Log.e(TAG, "Unknown packet type");
                             continue;
                     }
-                    handlePacket(packet);
+                    handlePackets(packets);
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();
@@ -522,12 +530,14 @@ public class BluetoothService {
             }
         }
 
-        private JointPacket parseJointPacket(String[] data) {
+        private ArrayList<BluetoothDataPacket> parseJointPacket(String[] data) {
             JointPacket packet = new JointPacket();
+            ArrayList<BluetoothDataPacket> packets = new ArrayList<>();
+            packets.add(packet);
             packet.deltaT = Integer.parseInt(data[1]);
             try {
                 for (int i = 2; i < data.length; i+=6){
-                    if(!data[i].equals(JointPacket.separator)) return packet;
+                    if(!data[i].equals(JointPacket.separator)) return packets;
 
                     packet.addJoint(Joint.JointType.values()[Integer.parseInt(data[i+1])],
                             Joint.JointTrackingState.values()[Integer.parseInt(data[i+2])],
@@ -538,28 +548,52 @@ public class BluetoothService {
             } catch (ArrayIndexOutOfBoundsException e) {
                 Log.e(TAG, "Incorrectly formatted JOINT message");
             }
-            return packet;
+            return packets;
         }
 
-        private HeadPacket parseMarkerPacket(String[] data) {
-            HeadPacket packet = new HeadPacket();
-            packet.deltaT = Integer.parseInt(data[1]);
+        private ArrayList<BluetoothDataPacket> parseMarkerPacket(String[] data) {
+            ArrayList<BluetoothDataPacket> packets = new ArrayList<>();
             int i = 2;
-
             try {
-                while (i < data.length){
-                    if(data[i].equals(HeadPacket.headString)) {
-                        packet.addHead(Float.parseFloat(data[i+1]),
-                                Float.parseFloat(data[i+2]),
-                                Float.parseFloat(data[i+3]),
-                                Float.parseFloat(data[i+4]));
-                        i += 5;
-                    }
+                if(data[i].equals(HeadPacket.headString)) {
+                    HeadPacket packet = new HeadPacket();
+                    packet.deltaT = Integer.parseInt(data[1]);
+                    packet.setHeadPos(Float.parseFloat(data[i+1]),
+                            Float.parseFloat(data[i+2]),
+                            Float.parseFloat(data[i+3]),
+                            Float.parseFloat(data[i+4]));
+                    i += 5;
+                    packets.add(packet);
+                }
+                if(data[i].equals(EndEffectorMarkerPacket.eefString)) {
+                    EndEffectorMarkerPacket packet = new EndEffectorMarkerPacket();
+                    packet.deltaT = Integer.parseInt(data[1]);
+                    packet.setEEPos(Float.parseFloat(data[i+1]),
+                            Float.parseFloat(data[i+2]),
+                            Float.parseFloat(data[i+3]));
+                    i += 4;
+                    packets.add(packet);
                 }
             } catch (ArrayIndexOutOfBoundsException e) {
                 Log.e(TAG, "Incorrectly formatted MARKER message");
             }
-            return packet;
+            return packets;
+        }
+
+        private ArrayList<BluetoothDataPacket> parseRobotKinPosPacket(String[] data) {
+            RobotKinPosPacket packet = new RobotKinPosPacket();
+            ArrayList<BluetoothDataPacket> packets = new ArrayList<>();
+            packets.add(packet);
+            packet.deltaT = Integer.parseInt(data[1]);
+            try {
+                packet.setPos(Float.parseFloat(data[2]),
+                        Float.parseFloat(data[3]),
+                        Float.parseFloat(data[4]));
+                packets.add(packet);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                Log.e(TAG, "Incorrectly formatted kinematic position message");
+            }
+            return packets;
         }
 
         /**
