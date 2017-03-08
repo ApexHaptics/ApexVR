@@ -21,6 +21,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.os.ParcelUuid;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -39,6 +40,8 @@ import io.github.apexhaptics.apexhapticsdisplay.datatypes.Joint;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.JointPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.Head;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.HeadPacket;
+
+import static android.util.Log.d;
 
 /**
  * This class does all the work for setting up and managing Bluetooth
@@ -81,29 +84,31 @@ public class BluetoothService {
      */
     public BluetoothService(Context context) {
 //    public BluetoothService(Context context, Handler handler) {
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = STATE_NONE;
 //        mHandler = handler;
 
         // Connect to the bluetooth device
         // Because this is run on startup, the app must run after the computer. This can be changed
-        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter == null) {
+        mAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mAdapter == null) {
             // Device does not support Bluetooth
-            Log.d(TAG, "Bluetooth unsupported");
+            d(TAG, "Bluetooth unsupported");
             return;
         }
 
-        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+        Set<BluetoothDevice> pairedDevices = mAdapter.getBondedDevices();
 
         if (pairedDevices.size() > 0) {
             // There are paired devices. Get the name and address of each paired device.
             for (BluetoothDevice device : pairedDevices) {
                 String deviceName = device.getName();
                 String deviceHardwareAddress = device.getAddress(); // MAC address
+                boolean foundId = false;
+                if(!deviceName.contains("DESKTOP")) continue;
                 Log.d(TAG, "Bluetooth Device name: " + deviceName);
-                Log.d(TAG, "Bluetooth Device MAC: " + deviceHardwareAddress);
+                d(TAG, "Bluetooth Device MAC: " + deviceHardwareAddress);
                 connect(device); // Temporarily connecting to every device. This can be changed
+                break;
             }
         }
     }
@@ -125,12 +130,12 @@ public class BluetoothService {
      * @param state An integer defining the current connection state
      */
     private synchronized void setState(int state) {
-        Log.d(TAG, "setState() " + mState + " -> " + state);
+        d(TAG, "setState() " + mState + " -> " + state);
         mState = state;
 
         // Give the new state to the Handler so the UI Activity can update
         //mHandler.obtainMessage(Constants.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
-        Log.d(TAG,"State: " + state);
+        d(TAG,"State: " + state);
     }
 
     /**
@@ -145,7 +150,7 @@ public class BluetoothService {
      * session in listening (server) mode. Called by the Activity onResume()
      */
     public synchronized void start() {
-        Log.d(TAG, "start");
+        d(TAG, "start");
 
         // Cancel any thread attempting to make a connection
         if (mConnectThread != null) {
@@ -174,7 +179,7 @@ public class BluetoothService {
      * @param device The BluetoothDevice to connect
      */
     public synchronized void connect(BluetoothDevice device) {
-        Log.d(TAG, "connect to: " + device);
+        d(TAG, "connect to: " + device);
 
         // Cancel any thread attempting to make a connection
         if (mState == STATE_CONNECTING) {
@@ -203,7 +208,7 @@ public class BluetoothService {
      * @param device The BluetoothDevice that has been connected
      */
     public synchronized void connected(BluetoothSocket socket, BluetoothDevice device) {
-        Log.d(TAG, "connected");
+        d(TAG, "connected");
 
         // Cancel the thread that completed the connection
         if (mConnectThread != null) {
@@ -229,7 +234,7 @@ public class BluetoothService {
 //        bundle.putString(Constants.DEVICE_NAME, device.getName());
 //        msg.setData(bundle);
 //        mHandler.sendMessage(msg);
-        Log.d(TAG,"DEVICE_NAME: " + device.getName());
+        d(TAG,"DEVICE_NAME: " + device.getName());
 
         setState(STATE_CONNECTED);
 
@@ -242,7 +247,7 @@ public class BluetoothService {
      * Stop all threads
      */
     public synchronized void stop() {
-        Log.d(TAG, "stop");
+        d(TAG, "stop");
 
         if (mConnectThread != null) {
             mConnectThread.cancel();
@@ -289,7 +294,7 @@ public class BluetoothService {
 //        bundle.putString(Constants.TOAST, "Unable to connect device");
 //        msg.setData(bundle);
 //        mHandler.sendMessage(msg);
-        Log.d(TAG,"Unable to connect device");
+        d(TAG,"Unable to connect device");
 
         // Start the service over to restart listening mode
         BluetoothService.this.start();
@@ -305,7 +310,7 @@ public class BluetoothService {
 //        bundle.putString(Constants.TOAST, "Device connection was lost");
 //        msg.setData(bundle);
 //        mHandler.sendMessage(msg);
-        Log.d(TAG,"Device connection was lost");
+        d(TAG,"Device connection was lost");
 
         // Start the service over to restart listening mode
         BluetoothService.this.start();
@@ -334,7 +339,7 @@ public class BluetoothService {
         }
 
         public void run() {
-            Log.d(TAG, "Socket BEGIN mAcceptThread" + this);
+            d(TAG, "Socket BEGIN mAcceptThread" + this);
             setName("AcceptThread");
 
             BluetoothSocket socket = null;
@@ -377,7 +382,7 @@ public class BluetoothService {
         }
 
         public void cancel() {
-            Log.d(TAG, "Socket cancel " + this);
+            d(TAG, "Socket cancel " + this);
             try {
                 mmServerSocket.close();
             } catch (IOException e) {
@@ -462,7 +467,7 @@ public class BluetoothService {
         private final OutputStream mmOutStream;
 
         ConnectedThread(BluetoothSocket socket) {
-            Log.d(TAG, "create ConnectedThread");
+            d(TAG, "create ConnectedThread");
             mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
@@ -569,7 +574,7 @@ public class BluetoothService {
                 // Share the sent message back to the UI Activity
 //                mHandler.obtainMessage(Constants.MESSAGE_WRITE, -1, -1, buffer)
 //                        .sendToTarget();
-                Log.d(TAG,"MESSAGE_WRITE");
+                d(TAG,"MESSAGE_WRITE");
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
             }
