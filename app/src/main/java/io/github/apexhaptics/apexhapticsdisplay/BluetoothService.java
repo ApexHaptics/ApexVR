@@ -561,11 +561,12 @@ public class BluetoothService {
                     packet.setHeadPos(Float.parseFloat(data[i+1]),
                             Float.parseFloat(data[i+2]),
                             Float.parseFloat(data[i+3]),
-                            Float.parseFloat(data[i+4]));
-                    i += 5;
+                            Float.parseFloat(data[i+4]),
+                            Float.parseFloat(data[i+5]));
+                    i += 6;
                     packets.add(packet);
                 }
-                if(data[i].equals(EndEffectorMarkerPacket.eefString)) {
+                if(data.length > i && data[i].equals(EndEffectorMarkerPacket.eefString)) {
                     EndEffectorMarkerPacket packet = new EndEffectorMarkerPacket();
                     packet.deltaT = Integer.parseInt(data[1]);
                     packet.setEEPos(Float.parseFloat(data[i+1]),
