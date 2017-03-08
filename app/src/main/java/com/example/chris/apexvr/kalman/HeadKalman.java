@@ -1,6 +1,9 @@
 package com.example.chris.apexvr.kalman;
 
 import android.opengl.Matrix;
+import android.util.Log;
+
+import java.util.Arrays;
 
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.Head;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.Joint;
@@ -11,6 +14,7 @@ import io.github.apexhaptics.apexhapticsdisplay.datatypes.Joint;
 
 public class HeadKalman {
 
+    private static final String TAG = "Apex_Kalman";
     float[] headPos = new float[]{0.0f,1.8f,0.0f};
     float[] orientation = new float[]{0.0f,0.0f,0.0f,1.0f};
 
@@ -35,6 +39,8 @@ public class HeadKalman {
     public float[] getHeadTransform(){
 
         float[] camera = quat2Mat(orientation);
+
+        Log.i(TAG, Arrays.toString(headPos));
 
         Matrix.translateM(camera,0, -headPos[0], -headPos[1], -headPos[2]);
 
