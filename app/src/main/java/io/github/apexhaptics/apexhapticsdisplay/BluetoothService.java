@@ -559,9 +559,9 @@ public class BluetoothService {
                     HeadPacket packet = new HeadPacket();
                     packet.deltaT = Integer.parseInt(data[1]);
                     float[] headRotMat = new float[] {
-                            Float.parseFloat(data[i+4]), Float.parseFloat(data[i+5]),Float.parseFloat(data[i+6]),0,
-                            Float.parseFloat(data[i+7]), Float.parseFloat(data[i+8]),Float.parseFloat(data[i+9]),0,
-                            Float.parseFloat(data[i+10]), Float.parseFloat(data[i+11]),Float.parseFloat(data[i+12]),0,
+                            Float.parseFloat(data[i+4]), Float.parseFloat(data[i+7]),Float.parseFloat(data[i+10]),0,
+                            Float.parseFloat(data[i+5]), Float.parseFloat(data[i+8]),Float.parseFloat(data[i+11]),0,
+                            Float.parseFloat(data[i+6]), Float.parseFloat(data[i+9]),Float.parseFloat(data[i+12]),0,
                             0,0,0,1,
                     };
                     packet.setHeadPos(Float.parseFloat(data[i+1]),
