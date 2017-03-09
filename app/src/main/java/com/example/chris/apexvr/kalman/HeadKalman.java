@@ -86,6 +86,29 @@ public class HeadKalman {
 
         x.set(A.mult(x));
         P.set(A.mult(P.mult(A.transpose())).plus(Q));
+
+        if(headPacket == null){
+
+            SimpleMatrix subC = C.extractVector(true,0);
+            double subR = R.get(0,0);
+
+            double yk = unrole(extractYaw(orientation)) - subC.mult(x).get(0);
+            double s = subC.mult(P.mult(subC.transpose())).get(0);
+            SimpleMatrix K = P.mult(subC).divide(s);
+
+            x = x.plus(K.scale(yk));
+            P = SimpleMatrix.identity(3).minus(K.mult(subC)).mult(P);
+
+        }else{
+
+
+
+        }
+
+    }
+
+    private float unrole(float v) {
+        return v;
     }
 
     public float[] getHeadTransform(){

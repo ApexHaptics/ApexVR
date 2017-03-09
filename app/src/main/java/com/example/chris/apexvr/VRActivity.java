@@ -95,6 +95,10 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
     @Override
     public void onDrawEye(Eye eye) {
 
+        if(!headKalman.isReady()){
+            return;
+        }
+
 
         float[] view = new float[16];
         float[] eyeTran = new float[16];
