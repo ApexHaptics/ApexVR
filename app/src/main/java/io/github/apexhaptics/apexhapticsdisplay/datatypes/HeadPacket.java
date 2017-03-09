@@ -1,5 +1,7 @@
 package io.github.apexhaptics.apexhapticsdisplay.datatypes;
 
+import android.opengl.Matrix;
+
 /**
  * Created by Jaden on 2017-02-15.
  */
@@ -10,15 +12,13 @@ public class HeadPacket extends BluetoothDataPacket {
     public float X;
     public float Y;
     public float Z;
-    public float yaw;
-    public float pitch;
+    public float[] rotMat;
 
-    public void setHeadPos(float x, float y, float z, float yaw, float pitch) {
+    public void setHeadPos(float x, float y, float z, float[] rotMat) {
         X=x;
         Y=y;
         Z=z;
-        this.yaw = yaw;
-        this.pitch = pitch;
+        this.rotMat = rotMat;
     }
 
     public String getPacketString() { return packetString; }
