@@ -30,7 +30,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
     private GvrAudioEngine gvrAudioEngine;
     private ApexGraphics graphics;
 
-    private BluetoothService myBluetoothService;
+    private BluetoothService bluetoothService;
 
     private HeadKalman headKalman;
 
@@ -58,9 +58,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         headKalman = new HeadKalman();
 
         // Initialize Bluetooth
-        myBluetoothService = new BluetoothService(this.getApplicationContext());
-        myBluetoothService.registerPacketQueue(HeadPacket.packetString,headKalman.getHeadQueue());
-        myBluetoothService.registerPacketQueue(JointPacket.packetString,headKalman.getJointQueue());
+        bluetoothService = new BluetoothService(this.getApplicationContext());
 
 
         Log.i(TAG, "Ready");
@@ -88,7 +86,9 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         float[] tranformation = new float[16];
 
         headTransform.getHeadView(tranformation,0);
-        headKalman.step(tranformation);
+        headKalman.step(tranformation,
+                (HeadPacket) bluetoothService.getPacket(HeadPacket.packetString),
+                (JointPacket) bluetoothService.getPacket(JointPacket.packetString));
 
     }
 

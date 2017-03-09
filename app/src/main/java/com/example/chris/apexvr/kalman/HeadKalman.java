@@ -2,12 +2,8 @@ package com.example.chris.apexvr.kalman;
 
 import android.opengl.Matrix;
 import android.os.SystemClock;
-import android.util.Log;
 
 import org.ejml.simple.SimpleMatrix;
-
-import java.util.Arrays;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.HeadPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.JointPacket;
@@ -21,10 +17,6 @@ public class HeadKalman {
     private static final String TAG = "Apex_Kalman";
     float[] headPos = new float[]{0.0f,1.8f,0.0f};
     float[] orientation = new float[]{0.0f,0.0f,0.0f,1.0f};
-
-
-    private ConcurrentLinkedQueue<HeadPacket> headQueue;
-    private ConcurrentLinkedQueue<JointPacket> jointQueue;
 
     private SimpleMatrix A;
     private SimpleMatrix C;
@@ -40,8 +32,6 @@ public class HeadKalman {
     private boolean ready;
 
     public HeadKalman(){
-        headQueue = new ConcurrentLinkedQueue<>();
-        jointQueue = new ConcurrentLinkedQueue<>();
 
         A = new SimpleMatrix(3,3);
         A.set(0,0,1);
@@ -65,11 +55,11 @@ public class HeadKalman {
 
     }
 
-    public void step(float[] orientation){
+    public void step(float[] orientation, HeadPacket headPacket, JointPacket jointPacket){
 
         if(!ready){
 
-            ready = headQueue.isEmpty() || jointQueue.isEmpty();
+            ready = !(headPacket == null || jointPacket == null);
 
             if(ready){
                 frameTime = SystemClock.currentThreadTimeMillis();
@@ -95,8 +85,7 @@ public class HeadKalman {
         A.set(0,1,dt);
 
         x.set(A.mult(x));
-
-
+        P.set(A.mult(P.mult(A.transpose())).plus(Q));
     }
 
     public float[] getHeadTransform(){
@@ -115,14 +104,6 @@ public class HeadKalman {
     }
     private int openGlMatrixIndex(int m, int n){
         return m * 4 + n;
-    }
-
-    public ConcurrentLinkedQueue<HeadPacket> getHeadQueue() {
-        return headQueue;
-    }
-
-    public ConcurrentLinkedQueue<JointPacket> getJointQueue() {
-        return jointQueue;
     }
 
     public boolean isReady() {
