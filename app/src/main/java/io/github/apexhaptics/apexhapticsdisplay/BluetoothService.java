@@ -29,19 +29,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.BluetoothDataPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.EndEffectorMarkerPacket;
+import io.github.apexhaptics.apexhapticsdisplay.datatypes.HeadPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.Joint;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.JointPacket;
-import io.github.apexhaptics.apexhapticsdisplay.datatypes.HeadPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.RobotKinPosPacket;
 
 import static android.util.Log.d;
@@ -77,7 +75,7 @@ public class BluetoothService {
     public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
     public static final int STATE_CONNECTED = 3;  // now connected to a remote device
 
-    private Map<String, ConcurrentLinkedQueue> dataPacketQueues = new HashMap<String, ConcurrentLinkedQueue>();
+    private ConcurrentMap<String, BluetoothDataPacket> dataPackets = new ConcurrentHashMap<>();
 
     /**
      * Constructor. Prepares a new BluetoothChat session.
@@ -116,17 +114,26 @@ public class BluetoothService {
         }
     }
 
-    public void registerPacketQueue(String packetString, ConcurrentLinkedQueue queue) {
-        dataPacketQueues.put(packetString, queue);
-    }
 
     private void handlePackets(List<BluetoothDataPacket> packets) {
         for (BluetoothDataPacket packet:packets) {
-            ConcurrentLinkedQueue queue = dataPacketQueues.get(packet.getPacketString());
-            if (queue != null) {
-                queue.add(packet);
-            }
+            dataPackets.put(packet.getPacketString(),packet);
         }
+    }
+
+    public BluetoothDataPacket getPacket(String name){
+        BluetoothDataPacket packet = dataPackets.get(name);
+        if(packet != null){
+            dataPackets.put(name,null);
+        }
+
+        return packet;
+    }
+
+    public boolean hasPacket(String name){
+
+        return dataPackets.get(name) != null;
+
     }
 
     /**
