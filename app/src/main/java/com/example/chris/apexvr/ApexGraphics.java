@@ -131,7 +131,7 @@ public class ApexGraphics {
         GroundCreater groundCreater = new GroundCreater(240.0f,200);
 
 
-        //groundCreater.perturb(5.0f,0.5f,6,6);//TODO:RE-ENABLE
+        groundCreater.perturb(5.0f,0.5f,6,6);//TODO:RE-ENABLE
 
         float groudAtZero = groundCreater.maxHight(1.5f) + 0.5f;
 
