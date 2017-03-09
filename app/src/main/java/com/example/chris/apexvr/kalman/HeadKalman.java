@@ -6,6 +6,7 @@ import android.os.SystemClock;
 import org.ejml.simple.SimpleMatrix;
 
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.HeadPacket;
+import io.github.apexhaptics.apexhapticsdisplay.datatypes.Joint;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.JointPacket;
 
 /**
@@ -15,8 +16,10 @@ import io.github.apexhaptics.apexhapticsdisplay.datatypes.JointPacket;
 public class HeadKalman {
 
     private static final String TAG = "Apex_Kalman";
-    float[] headPos = new float[]{0.0f,1.8f,0.0f};
-    float[] orientation = new float[]{0.0f,0.0f,0.0f,1.0f};
+    float[] translation = new float[16];
+    float[] rotation = new float[16];
+
+    private KinectCorrectionData kinectCorrectionData;
 
     private SimpleMatrix A;
     private SimpleMatrix C;
@@ -49,11 +52,19 @@ public class HeadKalman {
         Q = new SimpleMatrix(3,3);
         Q.set(0,0,0.1571);
         Q.set(1,1,1.5708);
-        Q.set(2,2,0.0314);
+        Q.set(2,2,0.000314);
 
+
+        Matrix.setIdentityM(rotation,0);
+        Matrix.setIdentityM(translation,0);
+        Matrix.translateM(translation,0,0,-1.8f,0);
 
 
     }
+
+    float stickerYaw;
+    float offSet = 0;
+    float[] pos = new float[3];
 
     public void step(float[] orientation, HeadPacket headPacket, JointPacket jointPacket){
 
@@ -61,13 +72,23 @@ public class HeadKalman {
 
             ready = !(headPacket == null || jointPacket == null);
 
+            ready = !(headPacket == null);//TODO:REMOVE
+
             if(ready){
                 frameTime = SystemClock.currentThreadTimeMillis();
 
                 x = new SimpleMatrix(3,1);
                 x.set(0,extractYaw(orientation));
 
-                //TODO:set initial yaw offset
+                float[] upVector = upVector(orientation);
+                kinectCorrectionData = calculateKinectCorrections(
+                        headPacket.rotMat, upVector);
+
+                float[] sticker = correctKinectMatrix(kinectCorrectionData,headPacket.rotMat);
+
+                stickerYaw = extractYaw(sticker);
+
+                x.set(0,extractYaw(sticker) - x.get(0));
 
                 P = new SimpleMatrix(3,3);
                 P.set(0,0,0.0157);
@@ -80,44 +101,160 @@ public class HeadKalman {
         }
 
         long time = SystemClock.currentThreadTimeMillis();
-        float dt = 1000*(time - frameTime);
+        float dt = (time - frameTime)/1000;
         frameTime = time;
         A.set(0,1,dt);
 
-        x.set(A.mult(x));
+        SimpleMatrix xk = A.mult(x);
         P.set(A.mult(P.mult(A.transpose())).plus(Q));
+
+        //double imu = unroll(extractYaw(orientation),x.get(0));
+        //Log.i(TAG,"IMU: " + imu);
+
+        /*
 
         if(headPacket == null){
 
             SimpleMatrix subC = C.extractVector(true,0);
             double subR = R.get(0,0);
 
-            double yk = unrole(extractYaw(orientation)) - subC.mult(x).get(0);
-            double s = subC.mult(P.mult(subC.transpose())).get(0);
-            SimpleMatrix K = P.mult(subC).divide(s);
+            double yk = imu - subC.mult(xk).get(0);
+            double s = subC.mult(P.mult(subC.transpose())).get(0) + subR;
+            SimpleMatrix K = P.mult(subC.transpose()).divide(s);
 
-            x = x.plus(K.scale(yk));
-            P = SimpleMatrix.identity(3).minus(K.mult(subC)).mult(P);
+            x.set(xk.plus(K.scale(yk)));
+            P.set(SimpleMatrix.identity(3).minus(K.mult(subC)).mult(P));
 
         }else{
 
+            float[] upVector = upVector(orientation);
+            kinectCorrectionData = calculateKinectCorrections(
+                    headPacket.rotMat, upVector);
+
+            float[] sticker = correctKinectMatrix(kinectCorrectionData,headPacket.rotMat);
+            float stickerYaw = unroll(extractYaw(sticker),x.get(0) + x.get(2));
+
+            //Log.i(TAG,"STR: " + stickerYaw);
+
+            SimpleMatrix z = new SimpleMatrix(2,1,false,new double[]{imu,stickerYaw});
+            SimpleMatrix yk = z.minus(C.mult(xk));
+            SimpleMatrix s = C.mult(P.mult(C.transpose())).plus(R);
+            SimpleMatrix k = P.mult(C.transpose()).mult(s.invert());
+
+            x.set(xk.plus(k.mult(yk)));
+            P.set(SimpleMatrix.identity(3).minus(k.mult(C)).mult(P));
+
+        }
+        */
+
+        //Log.i(TAG,"ref: " + x.get(0) + "off: " + x.get(2) + "abs: " + x.get(2) + x.get(0));
+
+        //Log.i(TAG,"off: " + x.get(2));
+        //Log.i(TAG,"abs: " + (x.get(2) + x.get(0)));
+
+        if(headPacket != null){
+            float[] upVector = upVector(orientation);
+            kinectCorrectionData = calculateKinectCorrections(
+                    headPacket.rotMat, upVector);
+
+            float[] sticker = correctKinectMatrix(kinectCorrectionData,headPacket.rotMat);
+            float newYaw = extractYaw(sticker);
 
 
+            float yawmod = (float) ((Math.abs(stickerYaw)+Math.PI)%(2*Math.PI)-Math.PI);
+            if(stickerYaw < 0){
+                yawmod =-yawmod;
+            }
+
+            float diff = yawmod - newYaw;
+
+            if(Math.abs(diff) < Math.PI){
+                stickerYaw -= diff * 0.1f;
+            }else{
+                if(diff > 0){
+                    stickerYaw += (float)(diff - Math.PI)*0.05f;
+                }else{
+                    stickerYaw += (float)(diff + Math.PI)*0.05f;
+                }
+            }
+
+            pos[0] = (float) (pos[0]*0.5-0.5*headPacket.X);
+            pos[1] = (float) (pos[1]*0.5+0.5*(headPacket.Y -1.8f));
+            pos[2] = (float) (pos[2]*0.5+0.5*headPacket.Z);
+
+
+            Matrix.translateM(translation,0,0,-1.2f,0);
+        }
+
+        //Log.i(TAG,"stickerYaw: " + stickerYaw);
+
+        float imu = -extractYaw(orientation);
+
+        offSet = 0.01f*(stickerYaw - imu) + (1-0.01f)*offSet;
+
+
+
+
+        for(int i = 12; i<15; ++i){
+            orientation[i] = 0;
+        }
+
+        //Matrix.rotateM(rotation,0,1.0f,0.0f,1.0f,0.0f);
+        //Matrix.setIdentityM(rotation,0);
+        Matrix.rotateM(rotation,0,orientation,0, (float) Math.toDegrees(offSet),0.0f,1.0f,0.0f);
+        //Matrix.rotateM(rotation,0, (float) Math.toDegrees(offSet + imu),0.0f,1.0f,0.0f);
+
+        //Matrix.rotateM(rotation,0,orientation,0, (float) Math.toDegrees(x.get(0)+x.get(2)-imu),0,1,0);
+
+        if(jointPacket != null){
+            Joint head = jointPacket.getJoint(Joint.JointType.Head);
+
+//            pos[0] = (float) (pos[0]*0.5-0.5*head.X);
+//            pos[1] = (float) (pos[1]*0.5+0.5*(head.Y -1.8f));
+//            pos[2] = (float) (pos[2]*0.5+0.5*head.Z);
+
+            //Matrix.setIdentityM(translation,0);
+            //Matrix.translateM(translation,0,-head.X,-head.Y,-head.Z);
         }
 
     }
 
-    private float unrole(float v) {
-        return v;
-    }
 
     public float[] getHeadTransform(){
 
-        float[] camera = quat2Mat(orientation);
+        float[] camera = new float[16];
+        Matrix.setIdentityM(translation,0);
+        Matrix.translateM(translation,0,pos[0],pos[1],pos[2]);
 
-        Matrix.translateM(camera,0, -headPos[0], -headPos[1], -headPos[2]);
+        Matrix.multiplyMM(camera,0, rotation,0,translation,0);
 
         return camera;
+    }
+
+    private float unroll(float v,double roll) {
+
+        return v;
+
+//        if(v > 0){
+//            if(roll < -Math.PI/2){
+//                return (float) (-roll % Math.PI - Math.PI + v);
+//            }
+//            return v;
+//        }else{
+//            if(roll > Math.PI/2){
+//                return (float) (roll % Math.PI + Math.PI + v);
+//            }
+//            return v;
+//        }
+    }
+
+    private float[] upVector(float[] transform){
+        float[] up = new float[4];
+        float[] y = new float[]{0, 1, 0, 1};
+
+        Matrix.multiplyMV(up,0,transform,0,y,0);
+
+        return up;
     }
 
     private float extractYaw(float[] transform){

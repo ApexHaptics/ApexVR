@@ -105,7 +105,7 @@ public class BluetoothService {
                 String deviceName = device.getName();
                 String deviceHardwareAddress = device.getAddress(); // MAC address
                 boolean foundId = false;
-                if(!deviceName.contains("DESKTOP")) continue;
+                if(!deviceName.contains("ALICE")) continue;
                 Log.d(TAG, "Bluetooth Device name: " + deviceName);
                 d(TAG, "Bluetooth Device MAC: " + deviceHardwareAddress);
                 connect(device); // Temporarily connecting to every device. This can be changed
@@ -124,7 +124,7 @@ public class BluetoothService {
     public BluetoothDataPacket getPacket(String name){
         BluetoothDataPacket packet = dataPackets.get(name);
         if(packet != null){
-            dataPackets.put(name,null);
+            dataPackets.remove(name);
         }
 
         return packet;
