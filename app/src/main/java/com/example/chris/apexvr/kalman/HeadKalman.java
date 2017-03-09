@@ -103,8 +103,6 @@ public class HeadKalman {
 
         float[] camera = quat2Mat(orientation);
 
-        Log.i(TAG, Arrays.toString(headPos));
-
         Matrix.translateM(camera,0, -headPos[0], -headPos[1], -headPos[2]);
 
         return camera;
