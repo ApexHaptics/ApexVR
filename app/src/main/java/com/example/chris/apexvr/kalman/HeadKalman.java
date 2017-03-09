@@ -178,10 +178,10 @@ public class HeadKalman {
                 }
             }
 
-            pos[0] = (float) (pos[0]*0.5-0.5*headPacket.X);
-            pos[1] = (float) (pos[1]*0.5+0.5*(headPacket.Y -1.8f));
-            pos[2] = (float) (pos[2]*0.5+0.5*(headPacket.Z+1.5f));
-
+            pos[0] = headPacket.X*-1; // The data is pre-filtered
+            pos[1] = headPacket.Y-1.8f;
+            pos[2] = headPacket.Z;
+            //pos[2] = headPacket.Z+1.5f;
 
             Matrix.translateM(translation,0,0,-1.2f,0);
         }
