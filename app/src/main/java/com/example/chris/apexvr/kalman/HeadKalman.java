@@ -163,5 +163,39 @@ public class HeadKalman {
         };
     }
 
+    public static class KinectCorrectionData {
+        float roll;
+        float pitch;
+        float[] correction_premultiplier_matrix = new float[16];
+    }
+
+    public static KinectCorrectionData calculateKinectCorrections(float[] kinect_space_transform, float[] up_vector){
+        KinectCorrectionData output = new KinectCorrectionData();
+        float[] up_vector_kinect = new float[4];
+        Matrix.multiplyMV(up_vector_kinect, 0, kinect_space_transform, 0, up_vector, 0);
+        output.roll = (float)Math.atan2(up_vector_kinect[0], up_vector_kinect[1]);
+        float[] kinect_roll_corrector = new float[16];
+        Matrix.setRotateM(kinect_roll_corrector, 0, (float)Math.toDegrees(output.roll), 0, 0, 1);
+        float[] up_vector_kinect_corrected = new float[4];
+        Matrix.multiplyMV(up_vector_kinect_corrected, 0, kinect_roll_corrector, 0, up_vector_kinect, 0);
+        output.pitch = (float)Math.atan2(-up_vector_kinect_corrected[2], up_vector_kinect_corrected[1]);
+        float[] kinect_pitch_corrector = new float[16];
+        Matrix.setRotateM(kinect_pitch_corrector, 0, (float)Math.toDegrees(output.pitch), 1, 0, 0);
+        Matrix.multiplyMM(output.correction_premultiplier_matrix, 0, kinect_pitch_corrector, 0, kinect_roll_corrector, 0);
+        return output;
+    }
+
+    public static float[] correctKinectVector(KinectCorrectionData correctionData, float[] vector){
+        float[] correctedVector = new float[4];
+        Matrix.multiplyMV(correctedVector, 0, correctionData.correction_premultiplier_matrix, 0, vector, 0);
+        return correctedVector;
+    }
+
+    public static float[] correctKinectMatrix(KinectCorrectionData correctionData, float[] matrix){
+        float[] correctedMatrix = new float[16];
+        Matrix.multiplyMM(correctedMatrix, 0, correctionData.correction_premultiplier_matrix, 0, matrix, 0);
+        return correctedMatrix;
+    }
+
 
 }
