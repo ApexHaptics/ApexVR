@@ -86,6 +86,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         float[] tranformation = new float[16];
 
         headTransform.getHeadView(tranformation,0);
+
         headKalman.step(tranformation,
                 (HeadPacket) bluetoothService.getPacket(HeadPacket.packetString),
                 (JointPacket) bluetoothService.getPacket(JointPacket.packetString));
