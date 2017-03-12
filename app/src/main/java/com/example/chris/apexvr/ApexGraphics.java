@@ -31,6 +31,7 @@ public class ApexGraphics {
 
     private static final float[] LIGHT_DIR_IN_WORLD_SPACE = new float[] {0.0f, 7.f/25.f, 24.f/25.f};
     private static final String TAG = "Apex Graphics";
+    private GLObject rightHand,leftHand;
 
     private List<GLObject> glObjects;
 
@@ -43,84 +44,22 @@ public class ApexGraphics {
 
 
     public void loadAssets(AssetManager assetManager){
-        GLProgram texProgram,colProgram,skyProgram,shadowProgram;
 
-        //Textured shader
-        try(Shader vertexShader = Shader.loadShader(assetManager.open("shaders/textured.vert"), GLES30.GL_VERTEX_SHADER)){
-            try( Shader fragmentShader  = Shader.loadShader(assetManager.open("shaders/textured.frag"),GLES30.GL_FRAGMENT_SHADER)){
-                texProgram = new GLProgram();
-                texProgram.attachShader(vertexShader,fragmentShader);
-            }
-        } catch (IOException e) {
-            Log.e(TAG,"Could not load shader: " + e.toString());
-            throw new RuntimeException("Could not load shader: " + e.toString());
-        }
-
-        //Coloured shader
-        try(Shader vertexShader = Shader.loadShader(assetManager.open("shaders/coloured.vert"),GLES30.GL_VERTEX_SHADER)){
-            try( Shader fragmentShader  = Shader.loadShader(assetManager.open("shaders/coloured.frag"),GLES30.GL_FRAGMENT_SHADER)){
-                colProgram = new GLProgram();
-                colProgram.attachShader(vertexShader,fragmentShader);
-            }
-        } catch (IOException e) {
-            Log.e(TAG,"Could not load shader: " + e.toString());
-            throw new RuntimeException("Could not load shader: " + e.toString());
-        }
-
-        //sky shader
-        try(Shader vertexShader = Shader.loadShader(assetManager.open("shaders/sky.vert"),GLES30.GL_VERTEX_SHADER)){
-            try( Shader fragmentShader  = Shader.loadShader(assetManager.open("shaders/sky.frag"),GLES30.GL_FRAGMENT_SHADER)){
-                skyProgram = new GLProgram();
-                skyProgram.attachShader(vertexShader,fragmentShader);
-            }
-        } catch (IOException e) {
-            Log.e(TAG,"Could not load shader: " + e.toString());
-            throw new RuntimeException("Could not load shader: " + e.toString());
-        }
-
-        //shadow shader
-        try(Shader vertexShader = Shader.loadShader(assetManager.open("shaders/shadow.vert"),GLES30.GL_VERTEX_SHADER)){
-            try( Shader fragmentShader  = Shader.loadShader(assetManager.open("shaders/shadow.frag"),GLES30.GL_FRAGMENT_SHADER)){
-                shadowProgram = new GLProgram();
-                shadowProgram.attachShader(vertexShader,fragmentShader);
-            }
-        } catch (IOException e) {
-            Log.e(TAG,"Could not load shader: " + e.toString());
-            throw new RuntimeException("Could not load shader: " + e.toString());
-        }
+        //shaders
+        //GLProgram texProgram = loadProgram(assetManager,"textured.vert", "textured.frag");
+        GLProgram colProgram = loadProgram(assetManager,"coloured.vert", "coloured.frag");
+        GLProgram skyProgram = loadProgram(assetManager,"sky.vert", "sky.frag");
+        GLProgram shadowProgram = loadProgram(assetManager,"shadow.vert", "shadow.frag");
 
         //Materials
         MatLib matLib = new MatLib();
-        try {
-            matLib.addMatLib(assetManager.open("matlibs/tree.mtl"));
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Could not open matlib file: matlibs/tree.mtl");
-        }
-        try {
-            matLib.addMatLib(assetManager.open("matlibs/ground.mtl"));
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Could not open matlib file: matlibs/graound.mtl");
-        }
-        try {
-            matLib.addMatLib(assetManager.open("matlibs/grass.mtl"));
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Could not open matlib file: matlibs/graound.mtl");
-        }
-        try {
-            matLib.addMatLib(assetManager.open("matlibs/table.mtl"));
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Could not open matlib file: matlibs/graound.mtl");
-        }
-        try {
-            matLib.addMatLib(assetManager.open("matlibs/pillar.mtl"));
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Could not open matlib file: matlibs/graound.mtl");
-        }
+        loadMatLib(matLib,assetManager,"tree.mtl");
+        loadMatLib(matLib,assetManager,"grass.mtl");
+        loadMatLib(matLib,assetManager,"left_hand.mtl");
+        loadMatLib(matLib,assetManager,"right_hand.mtl");
+        loadMatLib(matLib,assetManager,"table.mtl");
+        loadMatLib(matLib,assetManager,"pillar.mtl");
+
 
 
         Shadow shadows = new Shadow(shadowProgram,
@@ -131,7 +70,7 @@ public class ApexGraphics {
         GroundCreater groundCreater = new GroundCreater(240.0f,200);
 
 
-        //groundCreater.perturb(5.0f,0.5f,6,6);//TODO:RE-ENABLE
+        groundCreater.perturb(5.0f,0.5f,6,6);//TODO:RE-ENABLE
 
         float groudAtZero = groundCreater.maxHight(1.5f) + 0.5f;
 
@@ -141,29 +80,21 @@ public class ApexGraphics {
         ground.addExtention(shadows);
         glObjects.add(ground);
 
+        GLObject pillar = loadStaticMesh(matLib,colProgram,assetManager,"pillar.obj");
+        pillar.setCastingShadow(true);
+        pillar.addExtention(shadows);
 
-        try {
-            ColouredInterleavedMesh mesh = ColouredInterleavedMesh.importOBJInterleavedMesh(assetManager.open("meshes/pillar.obj"),matLib);
-            ColouredStaticObject platform = new ColouredStaticObject(colProgram,mesh);
-            platform.setCastingShadow(true);
-            platform.addExtention(shadows);
-            glObjects.add(platform);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Could not open obj file: meshes/pillar.obj");
-        }
+        GLObject table = loadStaticMesh(matLib,colProgram,assetManager,"table.obj");
+        Matrix.translateM(table.getOrientation(),0,1.0f,0.0f,0.0f);
+        table.setCastingShadow(true);
+        table.addExtention(shadows);
 
-        try {
-            ColouredInterleavedMesh mesh = ColouredInterleavedMesh.importOBJInterleavedMesh(assetManager.open("meshes/table.obj"),matLib);
-            ColouredStaticObject table = new ColouredStaticObject(colProgram,mesh);
-            Matrix.translateM(table.getOrientation(),0,1.0f,0.0f,0.0f);
-            table.setCastingShadow(true);
-            table.addExtention(shadows);
-            glObjects.add(table);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Could not open obj file: meshes/table.obj");
-        }
+        leftHand = loadStaticMesh(matLib,colProgram,assetManager,"left_hand.obj");
+        table.addExtention(shadows);
+
+        rightHand = loadStaticMesh(matLib,colProgram,assetManager,"right_hand.obj");
+        table.addExtention(shadows);
+
 
         try {
             VertexMesh mesh = VertexMesh.importOBJInterleavedMesh(assetManager.open("meshes/sky.obj"));
@@ -225,7 +156,7 @@ public class ApexGraphics {
             glObjects.add(tree);
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("Could not open obj file: meshes/ground.obj");
+            throw new RuntimeException("Could not open obj file: meshes/tree.obj");
         }
 
 
@@ -275,7 +206,7 @@ public class ApexGraphics {
             glObjects.add(grass);
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("Could not open obj file: meshes/ground.obj");
+            throw new RuntimeException("Could not open obj file: meshes/grass.obj");
         }
 
 
@@ -283,6 +214,50 @@ public class ApexGraphics {
         shadows.createStaticShadowMap(glObjects);
     }
 
+    private GLProgram loadProgram( AssetManager assetManager, String vertex, String fragment){
+
+        try(Shader vertexShader = Shader.loadShader(assetManager.open("shaders/" + vertex), GLES30.GL_VERTEX_SHADER)){
+            try( Shader fragmentShader  = Shader.loadShader(assetManager.open("shaders/" + fragment),GLES30.GL_FRAGMENT_SHADER)){
+                GLProgram program = new GLProgram();
+                program.attachShader(vertexShader,fragmentShader);
+
+                return program;
+            }
+        } catch (IOException e) {
+            Log.e(TAG,"Could not load shader: " + e.toString());
+            throw new RuntimeException("Could not load shader: " + e.toString());
+        }
+    }
+
+    private void loadMatLib(MatLib matLib, AssetManager assetManager, String file){
+        try {
+            matLib.addMatLib(assetManager.open("matlibs/" + file));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Could not open matlib file: " + file);
+        }
+    }
+
+    private GLObject loadStaticMesh( MatLib matLib, GLProgram program, AssetManager assetManager, String file){
+        try {
+            ColouredInterleavedMesh mesh = ColouredInterleavedMesh.importOBJInterleavedMesh(assetManager.open("meshes/" + file),matLib);
+            ColouredStaticObject object = new ColouredStaticObject(program,mesh);
+            glObjects.add(object);
+            return object;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Could not open obj file: meshes/" + file);
+        }
+    }
+
+    public GLObject getRightHand() {
+        return rightHand;
+    }
+
+
+    public GLObject getLeftHand() {
+        return leftHand;
+    }
 
     public void drawEye(float[] perspective, float[] view){
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);

@@ -16,8 +16,12 @@ import io.github.apexhaptics.apexhapticsdisplay.datatypes.JointPacket;
 public class HeadKalman {
 
     private static final String TAG = "Apex_Kalman";
+    private static final float KINETEC_HEIGHT = 1.8f;
+
     float[] translation = new float[16];
     float[] rotation = new float[16];
+    float[] leftHand = new float[16];
+    float[] rigthHand = new float[16];
     float imuYaw = 0;
     float stickerYaw = 0;
 
@@ -71,6 +75,8 @@ public class HeadKalman {
 
         Matrix.setIdentityM(rotation,0);
         Matrix.setIdentityM(translation,0);
+        Matrix.setIdentityM(leftHand,0);
+        Matrix.setIdentityM(rigthHand,0);
         Matrix.translateM(translation,0,0,-1.8f,0);
 
 
@@ -78,6 +84,9 @@ public class HeadKalman {
     float[] pos = new float[3];
 
     public void step(float[] orientation, HeadPacket headPacket, JointPacket jointPacket) {
+
+        rotation = orientation;
+
 
 
         if (!ready) {
@@ -135,9 +144,37 @@ public class HeadKalman {
         //Matrix.rotateM(rotation,0,orientation,0,
         //        (float) Math.toDegrees(imuYaw),0.0f,1.0f,0.0f);
 
-        Matrix.setIdentityM(rotation,0);
-        Matrix.rotateM(rotation,0,
-                (float) Math.toDegrees(xYaw.get(0)),0.0f,1.0f,0.0f);
+//        Matrix.setIdentityM(rotation,0);
+//        Matrix.rotateM(rotation,0,
+//                (float) Math.toDegrees(xYaw.get(0)),0.0f,1.0f,0.0f);
+
+
+        if(jointPacket != null){
+            float[] lhPos = jointPacket.getJoint(Joint.JointType.HandLeft).getCoordArray();
+            float[] lwPos = jointPacket.getJoint(Joint.JointType.WristLeft).getCoordArray();
+
+            float[] rhPos = jointPacket.getJoint(Joint.JointType.HandRight).getCoordArray();
+            float[] rwPos = jointPacket.getJoint(Joint.JointType.WristRight).getCoordArray();
+
+            Matrix.setIdentityM(leftHand,0);
+            Matrix.translateM(leftHand,0,lhPos[0],lhPos[1]-KINETEC_HEIGHT,lhPos[2]);
+
+            Matrix.setIdentityM(rigthHand,0);
+            Matrix.translateM(rigthHand,0,rhPos[0],rhPos[1]-KINETEC_HEIGHT,rhPos[2]);
+
+            float[] lhVec = new float[3];
+            float[] rhVec = new float[3];
+
+            for(int i = 0; i < 3; ++i){
+                lhVec[i] = lhPos[i] - lwPos[i];
+                rhVec[i] = lwPos[i] - rwPos[i];
+            }
+
+
+            rotateTo(leftHand,lhVec);
+            rotateTo(rigthHand,rhVec);
+
+        }
 
 //        if(jointPacket != null){
 //            Joint head = jointPacket.getJoint(Joint.JointType.Head);
@@ -234,11 +271,19 @@ public class HeadKalman {
 
         float[] camera = new float[16];
         Matrix.setIdentityM(translation,0);
-        Matrix.translateM(translation,0,pos[0],pos[1]-1.8f,pos[2]);
+        Matrix.translateM(translation,0,pos[0],pos[1]-KINETEC_HEIGHT,pos[2]);
 
         Matrix.multiplyMM(camera,0, rotation,0,translation,0);
 
         return camera;
+    }
+
+    public float[] getLeftHand(){
+        return leftHand;
+    }
+
+    public float[] getRigthHand(){
+        return rigthHand;
     }
 
     private float unroll(float v,float roll) {
@@ -290,6 +335,33 @@ public class HeadKalman {
         return (float) Math.atan2(transform[openGlMatrixIndex(0,2)],transform[openGlMatrixIndex(2,2)]);
 
     }
+
+    private float[] crossProduct(float[] a, float[] b){
+        return new float[]{
+                a[1]*b[2] - a[2]*b[1],
+                a[0]*b[2] - a[2]*b[0],
+                a[0]*b[1] - a[1]*b[0]
+        };
+    }
+
+    private float dotProduct(float[] a, float[] b){
+        return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+    }
+
+    private float[] rotateTo(float[] matrix, float[] target){
+
+        float mag = 0;
+        for(int i = 0; i < 3; ++i){
+            mag += target[i];
+        }
+
+        float angle = (float)Math.toDegrees(Math.acos(target[2]/mag));
+        Matrix.rotateM(matrix,0,angle, target[2],0.0f, -target[0]);
+
+        return matrix;
+
+    }
+
     private int openGlMatrixIndex(int m, int n){
         return m * 4 + n;
     }

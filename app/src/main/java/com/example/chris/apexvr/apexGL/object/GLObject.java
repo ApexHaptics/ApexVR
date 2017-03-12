@@ -7,7 +7,6 @@ import com.example.chris.apexvr.apexGL.shader.GLProgram;
 import com.example.chris.apexvr.apexGL.shader.LightingExtention;
 import com.example.chris.apexvr.apexGL.shader.Shadow;
 
-import java.security.cert.Extension;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +32,10 @@ public abstract class GLObject {
 
     public float[] getOrientation() {
         return orientation;
+    }
+
+    public void setOrientation(float[] orientation) {
+        this.orientation = orientation;
     }
 
     public void draw(float[] p, float[] v){
