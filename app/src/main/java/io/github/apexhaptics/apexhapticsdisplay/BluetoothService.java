@@ -37,6 +37,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.BluetoothDataPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.EndEffectorMarkerPacket;
+import io.github.apexhaptics.apexhapticsdisplay.datatypes.GameStatePacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.HeadPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.Joint;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.JointPacket;
@@ -105,7 +106,6 @@ public class BluetoothService {
                 String deviceName = device.getName();
                 String deviceHardwareAddress = device.getAddress(); // MAC address
                 boolean foundId = false;
-//                if(!deviceName.contains("ALICE")) continue;
                 if(!deviceName.contains("DESKTOP")) continue;
                 Log.d(TAG, "Bluetooth Device name: " + deviceName);
                 d(TAG, "Bluetooth Device MAC: " + deviceHardwareAddress);
@@ -523,6 +523,9 @@ public class BluetoothService {
                         case RobotKinPosPacket.packetString:
                             packets = parseRobotKinPosPacket(packetData);
                             break;
+                        case GameStatePacket.packetString:
+                            packets = parseGameStatePacket(packetData);
+                            break;
                         case "":
                             continue;
                         default:
@@ -607,9 +610,21 @@ public class BluetoothService {
                 packet.setPos(Float.parseFloat(data[2]),
                         Float.parseFloat(data[3]),
                         Float.parseFloat(data[4]));
-                packets.add(packet);
             } catch (ArrayIndexOutOfBoundsException e) {
                 Log.e(TAG, "Incorrectly formatted kinematic position message");
+            }
+            return packets;
+        }
+
+        private ArrayList<BluetoothDataPacket> parseGameStatePacket(String[] data) {
+            GameStatePacket packet = new GameStatePacket();
+            ArrayList<BluetoothDataPacket> packets = new ArrayList<>();
+            packets.add(packet);
+            try {
+                packet.setGameState(Integer.parseInt(data[1]),
+                        Integer.parseInt(data[2]));
+            } catch (ArrayIndexOutOfBoundsException e) {
+                Log.e(TAG, "Incorrectly formatted game state message");
             }
             return packets;
         }
