@@ -105,7 +105,8 @@ public class BluetoothService {
                 String deviceName = device.getName();
                 String deviceHardwareAddress = device.getAddress(); // MAC address
                 boolean foundId = false;
-                if(!deviceName.contains("ALICE")) continue;
+//                if(!deviceName.contains("ALICE")) continue;
+                if(!deviceName.contains("DESKTOP")) continue;
                 Log.d(TAG, "Bluetooth Device name: " + deviceName);
                 d(TAG, "Bluetooth Device MAC: " + deviceHardwareAddress);
                 connect(device); // Temporarily connecting to every device. This can be changed
@@ -477,6 +478,7 @@ public class BluetoothService {
         private final BluetoothSocket mmSocket;
         private final BufferedReader mmBufferedReader;
         private final OutputStream mmOutStream;
+        private final InputStream inputStream;
 
         ConnectedThread(BluetoothSocket socket) {
             d(TAG, "create ConnectedThread");
@@ -494,6 +496,7 @@ public class BluetoothService {
 
             mmOutStream = tmpOut;
             mmBufferedReader = new BufferedReader(new InputStreamReader(tmpIn));
+            inputStream = tmpIn;
         }
 
         public void run() {
@@ -503,6 +506,8 @@ public class BluetoothService {
             // Keep listening to the InputStream while connected
             while (mState == STATE_CONNECTED) {
                 try {
+
+                    Log.i(TAG,"Has data: " + inputStream.available());
                     // Send the obtained bytes to the UI Activity
 //                    mHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, buffer)
 //                            .sendToTarget();
