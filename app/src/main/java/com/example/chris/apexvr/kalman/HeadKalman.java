@@ -336,7 +336,7 @@ public class HeadKalman {
 
     private void calculateKinectCorrectionsStep(float[] kinect_space_transform, float[] up_vector){
         // cumulative averaging
-        float f = 1.f / kinectCorrectionData.averages;
+        float f = 1.f / kinectCorrectionData.averages++;
         float[] up_vector_kinect = new float[4];
         Matrix.multiplyMV(up_vector_kinect, 0, kinect_space_transform, 0, up_vector, 0);
         kinectCorrectionData.roll = (float)Math.atan2(up_vector_kinect[0], up_vector_kinect[1])*f + kinectCorrectionData.roll*(1.f - f);
