@@ -120,8 +120,8 @@ public class ApexSensors {
                 calculateKinectCorrectionsStep(headPacket.rotMat, upVector);
 
                 float[] sticker = correctKinectMatrix(headPacket.rotMat);
-                stickerYaw = extractYaw(sticker);
-                //stickerYaw = unroll(extractYaw(sticker), stickerYaw);
+                //stickerYaw = extractYaw(sticker);
+                stickerYaw = unroll(extractYaw(sticker), stickerYaw);
                 //stickerYaw = unroll(extractYaw(headPacket.rotMat), stickerYaw);
             }
 
@@ -138,15 +138,15 @@ public class ApexSensors {
 //            stickerYaw = unroll(extractYaw(headPacket.rotMat),stickerYaw);
 //            Matrix.setIdentityM(rotation,0);
 //            Matrix.rotateM(rotation,0,
-//                    (float) Math.toDegrees(stickerYaw),0.0f,1.0f,0.0f);
+//                    (float) Math.toDegrees(xYaw.get(0)),0.0f,1.0f,0.0f);
 
 
         //Matrix.rotateM(rotation,0,orientation,0,
         //        (float) Math.toDegrees(imuYaw),0.0f,1.0f,0.0f);
 
-        Matrix.setIdentityM(rotation,0);
+        rotation = orientation;
         Matrix.rotateM(rotation,0,
-                (float) Math.toDegrees(xYaw.get(0)),0.0f,1.0f,0.0f);
+                (float) Math.toDegrees(xYaw.get(0) - imuYaw),0.0f,1.0f,0.0f);
 
 
         if(jointPacket != null){
@@ -408,10 +408,12 @@ public class ApexSensors {
 
     private void calculateKinectCorrectionsStep(float[] kinect_space_transform, float[] up_vector){
         // cumulative averaging
-        float f = 1.f / kinectCorrectionData.averages++;
+        kinectCorrectionData.averages = Math.min(kinectCorrectionData.averages+1, 100);
+        float f = 1.f / kinectCorrectionData.averages;
         float[] up_vector_kinect = new float[4];
         Matrix.multiplyMV(up_vector_kinect, 0, kinect_space_transform, 0, up_vector, 0);
-        kinectCorrectionData.roll = (float)Math.atan2(up_vector_kinect[0], up_vector_kinect[1])*f + kinectCorrectionData.roll*(1.f - f);
+        //kinectCorrectionData.roll = (float)Math.atan2(up_vector_kinect[0], up_vector_kinect[1])*f + kinectCorrectionData.roll*(1.f - f);
+        kinectCorrectionData.roll = (float)Math.PI;
         float[] kinect_roll_corrector = new float[16];
         Matrix.setRotateM(kinect_roll_corrector, 0, (float)Math.toDegrees(kinectCorrectionData.roll), 0, 0, 1);
         float[] up_vector_kinect_corrected = new float[4];
