@@ -13,7 +13,7 @@ import io.github.apexhaptics.apexhapticsdisplay.datatypes.JointPacket;
  * Created by Chris on 3/7/2017.
  */
 
-public class HeadKalman {
+public class ApexSensors {
 
     private static final String TAG = "Apex_Kalman";
     private static final float KINETEC_HEIGHT = 1.8f;
@@ -44,7 +44,7 @@ public class HeadKalman {
 
     private boolean ready;
 
-    public HeadKalman(){
+    public ApexSensors(){
 
         A = new SimpleMatrix(2,2);
         A.set(0,0,1);

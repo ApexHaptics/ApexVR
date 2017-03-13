@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.example.chris.apexvr.apexGL.GLError;
 import com.example.chris.apexvr.apexGL.mesh.ColouredInterleavedMesh;
+import com.example.chris.apexvr.apexGL.mesh.ColourizedMesh;
 import com.example.chris.apexvr.apexGL.mesh.MatLib;
 import com.example.chris.apexvr.apexGL.mesh.VertexMesh;
 import com.example.chris.apexvr.apexGL.object.ColouredStaticObject;
@@ -32,13 +33,17 @@ public class ApexGraphics {
     private static final float[] LIGHT_DIR_IN_WORLD_SPACE = new float[] {0.0f, 7.f/25.f, 24.f/25.f};
     private static final String TAG = "Apex Graphics";
     private GLObject rightHand,leftHand;
+    private ColourizedMesh moleMesh;
+    private GLProgram colProgram;
 
     private List<GLObject> glObjects;
+    private List<ColouredStaticObject> moles;
 
 
     public ApexGraphics(){
 
         glObjects = new ArrayList<>(10);
+        moles = new ArrayList<>(9);
 
     }
 
@@ -47,7 +52,7 @@ public class ApexGraphics {
 
         //shaders
         //GLProgram texProgram = loadProgram(assetManager,"textured.vert", "textured.frag");
-        GLProgram colProgram = loadProgram(assetManager,"coloured.vert", "coloured.frag");
+        colProgram = loadProgram(assetManager,"coloured.vert", "coloured.frag");
         GLProgram skyProgram = loadProgram(assetManager,"sky.vert", "sky.frag");
         GLProgram shadowProgram = loadProgram(assetManager,"shadow.vert", "shadow.frag");
 
@@ -59,6 +64,7 @@ public class ApexGraphics {
         loadMatLib(matLib,assetManager,"right_hand.mtl");
         loadMatLib(matLib,assetManager,"table.mtl");
         loadMatLib(matLib,assetManager,"pillar.mtl");
+        loadMatLib(matLib,assetManager,"mole.mtl");
 
 
 
@@ -105,6 +111,14 @@ public class ApexGraphics {
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Could not open obj file: meshes/sky.obj");
+        }
+
+        try {
+            moleMesh = ColourizedMesh.importOBJInterleavedMesh(assetManager.open("meshes/mole.obj"));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Could not open obj file: meshes/mole.obj");
         }
 
 
@@ -248,6 +262,22 @@ public class ApexGraphics {
             e.printStackTrace();
             throw new RuntimeException("Could not open obj file: meshes/" + file);
         }
+    }
+
+    public int createMole(float[] colour){
+        int ID = moles.size();
+        moles.add(new ColouredStaticObject(colProgram,moleMesh.asColouredMesh(colour)));
+        return ID;
+
+    }
+
+    public void createMole(int ID, float[] colour){
+        moles.set(ID, new ColouredStaticObject(colProgram,moleMesh.asColouredMesh(colour)));
+
+    }
+
+    public float[] getMoleOrientation(int ID){
+        return moles.get(ID).getOrientation();
     }
 
     public GLObject getRightHand() {

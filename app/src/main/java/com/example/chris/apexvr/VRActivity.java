@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.example.chris.apexvr.apexGL.GLError;
-import com.example.chris.apexvr.kalman.HeadKalman;
+import com.example.chris.apexvr.kalman.ApexSensors;
 import com.google.vr.sdk.audio.GvrAudioEngine;
 import com.google.vr.sdk.base.Eye;
 import com.google.vr.sdk.base.GvrActivity;
@@ -32,7 +32,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
 
     private BluetoothService bluetoothService;
 
-    private HeadKalman headKalman;
+    private ApexSensors apexSensors;
 
 
     @Override
@@ -55,7 +55,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         setGvrView(gvrView);
 
 
-        headKalman = new HeadKalman();
+        apexSensors = new ApexSensors();
 
         // Initialize Bluetooth
         bluetoothService = new BluetoothService(this.getApplicationContext());
@@ -88,12 +88,12 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         headTransform.getHeadView(tranformation,0);
 
 
-        headKalman.step(tranformation,
+        apexSensors.step(tranformation,
                 (HeadPacket) bluetoothService.getPacket(HeadPacket.packetString),
                 (JointPacket) bluetoothService.getPacket(JointPacket.packetString));
 
-//        graphics.getLeftHand().setOrientation(headKalman.getLeftHand());
-//        graphics.getRightHand().setOrientation(headKalman.getRigthHand());
+//        graphics.getLeftHand().setOrientation(apexSensors.getLeftHand());
+//        graphics.getRightHand().setOrientation(apexSensors.getRigthHand());
 
         Matrix.setIdentityM(graphics.getLeftHand().getOrientation(),0);
         Matrix.setIdentityM(graphics.getRightHand().getOrientation(),0);
@@ -106,7 +106,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
     @Override
     public void onDrawEye(Eye eye) {
 /*
-        if(!headKalman.isReady()){
+        if(!apexSensors.isReady()){
             return;
         }
         */
@@ -115,7 +115,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         float[] view = new float[16];
         float[] eyeTran = new float[16];
 
-        float[] camera = headKalman.getHeadTransform();
+        float[] camera = apexSensors.getHeadTransform();
         float[] perspective = eye.getPerspective(Z_NEAR, Z_FAR);
 
         Matrix.setIdentityM(eyeTran,0);

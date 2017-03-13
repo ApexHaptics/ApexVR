@@ -11,25 +11,16 @@ import java.nio.IntBuffer;
 
 public class ColourizedMesh extends Mesh{
 
-    public FloatBuffer vertices;
-    public IntBuffer indexes;
+    private Mesh.MeshConstructionData meshData;
+
+
 
     public static final int FLOAT_STRIDE = 9;
 
-    public ColourizedMesh(FloatBuffer vertices, IntBuffer indexes){
-        this.indexes = indexes;
-        this.vertices = vertices;
-    }
 
-    protected ColourizedMesh(Mesh.MeshConstructionData meshData, float[] colour){
+    protected ColourizedMesh(Mesh.MeshConstructionData meshData){
 
-
-        float[] vertices = new float[meshData.nVertices * FLOAT_STRIDE];
-
-        addVertex(vertices, meshData.vertexTree, colour);
-
-        indexes = IntBuffer.wrap(meshData.indices);
-        this.vertices = FloatBuffer.wrap(vertices);
+        this.meshData = meshData;
 
     }
 
@@ -49,17 +40,26 @@ public class ColourizedMesh extends Mesh{
 
     }
 
-    public ColouredInterleavedMesh asColouredMesh(){
-        return new ColouredInterleavedMesh(vertices, indexes);
+    public ColouredInterleavedMesh asColouredMesh(float[] colour){
+        FloatBuffer vertBuffer;
+        IntBuffer indexes;
+        float[] vertices = new float[meshData.nVertices * FLOAT_STRIDE];
+
+        addVertex(vertices, meshData.vertexTree, colour);
+
+        indexes = IntBuffer.wrap(meshData.indices);
+        vertBuffer = FloatBuffer.wrap(vertices);
+
+        return new ColouredInterleavedMesh(vertBuffer, indexes);
     }
 
-    public static ColourizedMesh importOBJInterleavedMesh(InputStream inputStream, float[] colour) throws IOException {
+    public static ColourizedMesh importOBJInterleavedMesh(InputStream inputStream) throws IOException {
 
         Mesh.ImportOptions options = new Mesh.ImportOptions(){};
         options.useTexture = false;
         options.useMaterial = false;
 
-        return new ColourizedMesh(importOBJ(inputStream, null, options), colour);
+        return new ColourizedMesh(importOBJ(inputStream, null, options));
     }
 
 }
