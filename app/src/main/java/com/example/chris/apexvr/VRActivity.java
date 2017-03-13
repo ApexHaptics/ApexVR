@@ -105,11 +105,11 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
 
     @Override
     public void onDrawEye(Eye eye) {
-/*
+
         if(!apexSensors.isReady()){
             return;
         }
-        */
+
 
 
         float[] view = new float[16];

@@ -42,7 +42,7 @@ public class ApexSensors {
 
     private Long frameTime;
 
-    private boolean ready;
+    private boolean ready = false;
 
     public ApexSensors(){
 
@@ -79,13 +79,13 @@ public class ApexSensors {
         Matrix.setIdentityM(rigthHand,0);
         Matrix.translateM(translation,0,0,-1.8f,0);
 
+        kinectCorrectionData = new KinectCorrectionData();
+
 
     }
     float[] pos = new float[3];
 
     public void step(float[] orientation, HeadPacket headPacket, JointPacket jointPacket) {
-
-        rotation = orientation;
 
 
 
@@ -105,7 +105,7 @@ public class ApexSensors {
         imuYaw = imuYaw + dImuYaw;
 
         long time = SystemClock.currentThreadTimeMillis();
-        float dt = (time - frameTime) / 1000;
+        float dt = (time - frameTime) / 1000.0f;
         frameTime = time;
         //A.set(0,1,dt);
 
@@ -144,9 +144,9 @@ public class ApexSensors {
         //Matrix.rotateM(rotation,0,orientation,0,
         //        (float) Math.toDegrees(imuYaw),0.0f,1.0f,0.0f);
 
-//        Matrix.setIdentityM(rotation,0);
-//        Matrix.rotateM(rotation,0,
-//                (float) Math.toDegrees(xYaw.get(0)),0.0f,1.0f,0.0f);
+        Matrix.setIdentityM(rotation,0);
+        Matrix.rotateM(rotation,0,
+                (float) Math.toDegrees(xYaw.get(0)),0.0f,1.0f,0.0f);
 
 
         if(jointPacket != null){
