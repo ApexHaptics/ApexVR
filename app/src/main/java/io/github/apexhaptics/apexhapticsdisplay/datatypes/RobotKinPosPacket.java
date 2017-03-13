@@ -4,6 +4,9 @@ package io.github.apexhaptics.apexhapticsdisplay.datatypes;
  * Created by Jaden on 2017-02-15.
  */
 
+/**
+ * A class for getting kinematic position updates
+ */
 public class RobotKinPosPacket extends BluetoothDataPacket {
     public static final String packetString = "RPos";
     float X;

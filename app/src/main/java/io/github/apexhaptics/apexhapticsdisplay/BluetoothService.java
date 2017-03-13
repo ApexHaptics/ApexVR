@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.BluetoothDataPacket;
-import io.github.apexhaptics.apexhapticsdisplay.datatypes.EndEffectorMarkerPacket;
+import io.github.apexhaptics.apexhapticsdisplay.datatypes.RobotPosPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.GameStatePacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.HeadPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.Joint;
@@ -586,13 +586,20 @@ public class BluetoothService {
                     i += 13;
                     packets.add(packet);
                 }
-                if(data.length > i && data[i].equals(EndEffectorMarkerPacket.eefString)) {
-                    EndEffectorMarkerPacket packet = new EndEffectorMarkerPacket();
+                if(data.length > i && data[i].equals(RobotPosPacket.robString)) {
+                    RobotPosPacket packet = new RobotPosPacket();
                     packet.deltaT = Integer.parseInt(data[1]);
-                    packet.setEEPos(Float.parseFloat(data[i+1]),
+                    float[] robotRotMatrix = new float[] {
+                            Float.parseFloat(data[i+4]), Float.parseFloat(data[i+5]),Float.parseFloat(data[i+6]),0,
+                            Float.parseFloat(data[i+7]), Float.parseFloat(data[i+8]),Float.parseFloat(data[i+9]),0,
+                            Float.parseFloat(data[i+10]), Float.parseFloat(data[i+11]),Float.parseFloat(data[i+12]),0,
+                            0,0,0,1,
+                    };
+                    packet.setRobotPos(Float.parseFloat(data[i+1]),
                             Float.parseFloat(data[i+2]),
-                            Float.parseFloat(data[i+3]));
-                    i += 4;
+                            Float.parseFloat(data[i+3]),
+                            robotRotMatrix);
+                    i += 13;
                     packets.add(packet);
                 }
             } catch (ArrayIndexOutOfBoundsException e) {
