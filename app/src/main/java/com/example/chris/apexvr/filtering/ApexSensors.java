@@ -29,7 +29,7 @@ public class ApexSensors {
     float imuYaw = 0;
     float stickerYaw = 0;
 
-    OneEuro[] leftHandEuro,rigthHandEuro;
+    OneEuro[] leftHandEuro,rigthHandEuro, headPosEuro;
 
     private KinectCorrectionData kinectCorrectionData;
 
@@ -89,6 +89,11 @@ public class ApexSensors {
 
         leftHandEuro[2] = new OneEuro(15.0f,0.5f,2.5f);
         rigthHandEuro[2] = new OneEuro(15.0f,0.5f,2.5f);
+
+        headPosEuro = new OneEuro[3];
+        headPosEuro[0] = new OneEuro(15.0f,0.2f,3.0f);
+        headPosEuro[1] = new OneEuro(15.0f,0.2f,3.0f);
+        headPosEuro[2] = new OneEuro(15.0f,0.2f,3.0f);
 
 
         Matrix.setIdentityM(rotation,0);
@@ -203,8 +208,8 @@ public class ApexSensors {
 
                 float relative = (float) xPos[i].get(0) - headPos[i];
 
-                lhrp[i] = leftHandEuro[i].filter(lhPos[i]  + relative);
-                rhrp[i] = rigthHandEuro[i].filter(rhPos[i] + relative);
+                lhrp[i] = leftHandEuro[i].filter(lhPos[i]  + relative,dt);
+                rhrp[i] = rigthHandEuro[i].filter(rhPos[i] + relative,dt);
             }
 
             float[] translation = new float[16];
@@ -269,7 +274,7 @@ public class ApexSensors {
                 xPos[i].set(xkp.plus(k.mult(yk)));
                 PPos[i].set(SimpleMatrix.identity(2).minus(k.mult(C)).mult(PPos[i]));
 
-                pos[i] = (float) xPos[i].get(0);
+                pos[i] = headPosEuro[i].filter((float) xPos[i].get(0),dt);
             }
         }
     }

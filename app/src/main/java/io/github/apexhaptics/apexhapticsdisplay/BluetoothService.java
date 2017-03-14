@@ -64,6 +64,8 @@ public class BluetoothService {
     private static final CharSequence TAGET_NAME = "GEMMI";
 //    private static final CharSequence TAGET_NAME = "DESKTOP";
 //    private static final CharSequence TAGET_NAME = "ALICE";
+//    private static final CharSequence TAGET_NAME = "nope";
+
 
     // Member fields
     private final BluetoothAdapter mAdapter;

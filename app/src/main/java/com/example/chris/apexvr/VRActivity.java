@@ -54,11 +54,15 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         // Associate the gvrView with this activity.
         setGvrView(gvrView);
 
+//        MessageClient messageClient = new MessageClient();
+//        messageClient.start();
+
 
         apexSensors = new ApexSensors();
 
         // Initialize Bluetooth
         bluetoothService = new BluetoothService(this.getApplicationContext());
+
 
 
         Log.i(TAG, "Ready");

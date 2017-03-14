@@ -91,20 +91,20 @@ public class MessageClient {
                             Thread tester = new Thread(new Runnable() {
                                 @Override
                                 public void run() {
-//                                    try {
-//                                        while(!Thread.currentThread().isInterrupted()){
-//                                            writer.write(FRIST_HAND);
-//                                            foundApex = reader.readLine().equals(SECOND_HAND);
-//
-//                                            if(foundApex){
-//                                                MessageClient.this.notifyAll();
-//                                                return;
-//                                            }
-//
-//                                        }
-//                                    } catch (IOException e) {
-//                                        return;
-//                                    }
+                                    try {
+                                        while(!Thread.currentThread().isInterrupted()){
+                                            writer.write(FRIST_HAND);
+                                            foundApex = reader.readLine().equals(SECOND_HAND);
+
+                                            if(foundApex){
+                                                MessageClient.this.notifyAll();
+                                                return;
+                                            }
+
+                                        }
+                                    } catch (IOException e) {
+                                        return;
+                                    }
 
                                 }
                             });
@@ -112,19 +112,23 @@ public class MessageClient {
                             tester.start();
 
                             try {
-                                MessageClient.this.wait(1000);
+                                synchronized (MessageClient.this){
+                                    MessageClient.this.wait(1000);
+                                }
                             } catch (InterruptedException e) {}
 
                             while(tester.isAlive()){
                                 tester.interrupt();
                                 try {
-                                    this.wait(1);
+                                    Thread.sleep(4);
                                 } catch (InterruptedException e) {}
                             }
 
                             if(!foundApex){
                                 continue;
                             }
+
+                            Log.i(TAG,"Connected to " + device.getName());
 
 
                             while(running){
