@@ -9,9 +9,9 @@ package io.github.apexhaptics.apexhapticsdisplay.datatypes;
  */
 public class RobotKinPosPacket extends BluetoothDataPacket {
     public static final String packetString = "RPos";
-    float X;
-    float Y;
-    float Z;
+    private float X;
+    private float Y;
+    private float Z;
 
     @Override
     public String getPacketString() {
@@ -22,5 +22,19 @@ public class RobotKinPosPacket extends BluetoothDataPacket {
         X = x;
         Y = y;
         Z = z;
+    }
+
+    public float getZ() {
+        return Z;
+    }
+
+    public float getY() {
+
+        return Y;
+    }
+
+    public float getX() {
+
+        return X;
     }
 }

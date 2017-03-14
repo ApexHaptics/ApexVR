@@ -36,12 +36,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.BluetoothDataPacket;
-import io.github.apexhaptics.apexhapticsdisplay.datatypes.RobotPosPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.GameStatePacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.HeadPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.Joint;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.JointPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.RobotKinPosPacket;
+import io.github.apexhaptics.apexhapticsdisplay.datatypes.RobotPosPacket;
 
 import static android.util.Log.d;
 
@@ -61,6 +61,9 @@ public class BluetoothService {
     // Unique UUID shared with the PC application
     private static final UUID MY_UUID =
             UUID.fromString("2611ba68-84e1-4842-a15e-0bfc7e096686");
+    private static final CharSequence TAGET_NAME = "GEMMI";
+//    private static final CharSequence TAGET_NAME = "DESKTOP";
+//    private static final CharSequence TAGET_NAME = "ALICE";
 
     // Member fields
     private final BluetoothAdapter mAdapter;
@@ -106,7 +109,7 @@ public class BluetoothService {
                 String deviceName = device.getName();
                 String deviceHardwareAddress = device.getAddress(); // MAC address
                 boolean foundId = false;
-                if(!deviceName.contains("DESKTOP")) continue;
+                if(!deviceName.contains(TAGET_NAME)) continue;
                 Log.d(TAG, "Bluetooth Device name: " + deviceName);
                 d(TAG, "Bluetooth Device MAC: " + deviceHardwareAddress);
                 connect(device); // Temporarily connecting to every device. This can be changed
@@ -507,7 +510,7 @@ public class BluetoothService {
             while (mState == STATE_CONNECTED) {
                 try {
 
-                    Log.i(TAG,"Has data: " + inputStream.available());
+                    //Log.i(TAG,"Has data: " + inputStream.available());
                     // Send the obtained bytes to the UI Activity
 //                    mHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, buffer)
 //                            .sendToTarget();

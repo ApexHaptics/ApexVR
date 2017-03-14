@@ -32,6 +32,7 @@ public class ApexGraphics {
 
     private static final float[] LIGHT_DIR_IN_WORLD_SPACE = new float[] {0.0f, 7.f/25.f, 24.f/25.f};
     private static final String TAG = "Apex Graphics";
+    private static final float Z_CENTER = 1.5f;
     private GLObject rightHand,leftHand;
     private ColourizedMesh moleMesh;
     private GLProgram colProgram;
@@ -76,9 +77,9 @@ public class ApexGraphics {
         GroundCreater groundCreater = new GroundCreater(240.0f,200);
 
 
-        //groundCreater.perturb(5.0f,0.5f,6,6);//TODO:RE-ENABLE
+        groundCreater.perturb(5.0f,0.5f,6,6);//TODO:RE-ENABLE
 
-        float groudAtZero = groundCreater.maxHight(1.5f) + 0.5f;
+        float groudAtZero = groundCreater.maxHight(1.5f,0.0f,Z_CENTER) + 0.5f;
 
         ColouredStaticObject ground = new ColouredStaticObject(colProgram,groundCreater.getMesh());
         Matrix.translateM(ground.getOrientation(),0,0.0f,-groudAtZero,0.0f);
@@ -87,11 +88,12 @@ public class ApexGraphics {
         glObjects.add(ground);
 
         GLObject pillar = loadStaticMesh(matLib,colProgram,assetManager,"pillar.obj");
+        Matrix.translateM(pillar.getOrientation(),0,0.0f,0.0f,Z_CENTER);
         pillar.setCastingShadow(true);
         pillar.addExtention(shadows);
 
         GLObject table = loadStaticMesh(matLib,colProgram,assetManager,"table.obj");
-        Matrix.translateM(table.getOrientation(),0,1.0f,0.0f,0.0f);
+        Matrix.translateM(table.getOrientation(),0,0.6f,0.0f,Z_CENTER - 0.4f);
         table.setCastingShadow(true);
         table.addExtention(shadows);
 
@@ -278,6 +280,14 @@ public class ApexGraphics {
 
     public float[] getMoleOrientation(int ID){
         return moles.get(ID).getOrientation();
+    }
+
+    public void removeMole(int ID){
+        moles.remove(ID);
+    }
+
+    public int getNumberOfMoles(){
+        return moles.size();
     }
 
     public GLObject getRightHand() {

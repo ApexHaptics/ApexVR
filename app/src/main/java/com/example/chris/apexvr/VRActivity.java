@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.example.chris.apexvr.apexGL.GLError;
-import com.example.chris.apexvr.kalman.ApexSensors;
+import com.example.chris.apexvr.filtering.ApexSensors;
 import com.google.vr.sdk.audio.GvrAudioEngine;
 import com.google.vr.sdk.base.Eye;
 import com.google.vr.sdk.base.GvrActivity;
@@ -92,14 +92,14 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
                 (HeadPacket) bluetoothService.getPacket(HeadPacket.packetString),
                 (JointPacket) bluetoothService.getPacket(JointPacket.packetString));
 
-//        graphics.getLeftHand().setOrientation(apexSensors.getLeftHand());
-//        graphics.getRightHand().setOrientation(apexSensors.getRigthHand());
+        graphics.getLeftHand().setOrientation(apexSensors.getLeftHand());
+        graphics.getRightHand().setOrientation(apexSensors.getRigthHand());
 
-        Matrix.setIdentityM(graphics.getLeftHand().getOrientation(),0);
-        Matrix.setIdentityM(graphics.getRightHand().getOrientation(),0);
-
-        Matrix.translateM(graphics.getLeftHand().getOrientation(),0,-0.15f,1.6f,-0.6f);
-        Matrix.translateM(graphics.getRightHand().getOrientation(),0,0.15f,1.6f,-0.6f);
+//        Matrix.setIdentityM(graphics.getLeftHand().getOrientation(),0);
+//        Matrix.setIdentityM(graphics.getRightHand().getOrientation(),0);
+//
+//        Matrix.translateM(graphics.getLeftHand().getOrientation(),0,-0.15f,1.6f,-0.6f);
+//        Matrix.translateM(graphics.getRightHand().getOrientation(),0,0.15f,1.6f,-0.6f);
 
     }
 
