@@ -61,10 +61,13 @@ public class BluetoothService {
     // Unique UUID shared with the PC application
     private static final UUID MY_UUID =
             UUID.fromString("2611ba68-84e1-4842-a15e-0bfc7e096686");
-    private static final CharSequence TAGET_NAME = "GEMMI";
-//    private static final CharSequence TAGET_NAME = "DESKTOP";
+//    private static final CharSequence TAGET_NAME = "GEMMI";
+    private static final CharSequence TAGET_NAME = "DESKTOP";
 //    private static final CharSequence TAGET_NAME = "ALICE";
 //    private static final CharSequence TAGET_NAME = "nope";
+
+    // Bluetooth pol rate while disconnected
+    private static final int pollRate = 2000;
 
 
     // Member fields
@@ -103,19 +106,36 @@ public class BluetoothService {
             return;
         }
 
-        Set<BluetoothDevice> pairedDevices = mAdapter.getBondedDevices();
+        detectDeviceThread d = new detectDeviceThread();
+        d.run();
+    }
 
-        if (pairedDevices.size() > 0) {
-            // There are paired devices. Get the name and address of each paired device.
-            for (BluetoothDevice device : pairedDevices) {
-                String deviceName = device.getName();
-                String deviceHardwareAddress = device.getAddress(); // MAC address
-                boolean foundId = false;
-                if(!deviceName.contains(TAGET_NAME)) continue;
-                Log.d(TAG, "Bluetooth Device name: " + deviceName);
-                d(TAG, "Bluetooth Device MAC: " + deviceHardwareAddress);
-                connect(device); // Temporarily connecting to every device. This can be changed
-                break;
+    private class detectDeviceThread extends Thread {
+        public void run() {
+            while (true) {
+
+                Set<BluetoothDevice> pairedDevices = mAdapter.getBondedDevices();
+
+                if (pairedDevices.size() > 0) {
+                    boolean foundDevice = false;
+                    // There are paired devices. Get the name and address of each paired device.
+                    for (BluetoothDevice device : pairedDevices) {
+                        String deviceName = device.getName();
+                        String deviceHardwareAddress = device.getAddress(); // MAC address
+                        if (!deviceName.contains(TAGET_NAME)) continue;
+                        foundDevice = true;
+                        Log.d(TAG, "Bluetooth Device name: " + deviceName);
+                        d(TAG, "Bluetooth Device MAC: " + deviceHardwareAddress);
+                        connect(device);
+                        break;
+                    }
+                    if (foundDevice) break;
+                }
+                try {
+                    Thread.sleep(pollRate);
+                } catch (Exception e) {
+                    d(TAG, "Sleep exception");
+                }
             }
         }
     }
@@ -184,11 +204,8 @@ public class BluetoothService {
 
         setState(STATE_LISTEN);
 
-        // Start the thread to listen on a BluetoothServerSocket
-        if (mAcceptThread == null) {
-            mAcceptThread = new AcceptThread();
-            mAcceptThread.start();
-        }
+        detectDeviceThread d = new detectDeviceThread();
+        d.run();
     }
 
     /**
@@ -258,6 +275,7 @@ public class BluetoothService {
 
         // Start the thread to manage the connection and perform transmissions
         mConnectedThread = new ConnectedThread(socket);
+        mConnectedThread.setPriority(Thread.MAX_PRIORITY);
         mConnectedThread.start();
     }
 
@@ -315,6 +333,11 @@ public class BluetoothService {
         d(TAG,"Unable to connect device");
 
         // Start the service over to restart listening mode
+        try {
+            Thread.sleep(pollRate);
+        } catch (Exception e) {
+            d(TAG, "Sleep exception");
+        }
         BluetoothService.this.start();
     }
 
@@ -541,8 +564,6 @@ public class BluetoothService {
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();
-                    // Start the service over to restart listening mode
-                    BluetoothService.this.start();
                     break;
                 } catch (ArrayIndexOutOfBoundsException e) {
                     Log.e(TAG, "Incorrectly formatted message");
