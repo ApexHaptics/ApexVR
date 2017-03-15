@@ -633,8 +633,7 @@ public class BluetoothService {
             ArrayList<BluetoothDataPacket> packets = new ArrayList<>();
             packets.add(packet);
             try {
-                packet.setGameState(Integer.parseInt(data[1]),
-                        Integer.parseInt(data[2]));
+                packet.setGameState(Integer.parseInt(data[1]));
             } catch (ArrayIndexOutOfBoundsException e) {
                 Log.e(TAG, "Incorrectly formatted game state message");
             }

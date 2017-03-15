@@ -6,7 +6,6 @@ package io.github.apexhaptics.apexhapticsdisplay.datatypes;
 
 public class GameStatePacket extends BluetoothDataPacket {
     public static final String packetString = "GStt";
-    public GameState currentGameState;
     /**
      * The data value of the packet
      *      Only useful to indicate impedance in the ImpedanceSet state.
@@ -23,13 +22,7 @@ public class GameStatePacket extends BluetoothDataPacket {
         return packetString;
     }
 
-    public void setGameState(int gameState, int data) {
-        currentGameState = GameState.values()[gameState];
+    public void setGameState(int data) {
         this.data = data;
-    }
-    public enum GameState {
-        MovingToXY,         //0
-        ImpedanceSet,       //1
-        PositionReached,    //2
     }
 }
