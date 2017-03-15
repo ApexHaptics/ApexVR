@@ -9,11 +9,10 @@ import com.example.chris.apexvr.apexGL.GLError;
 import com.example.chris.apexvr.apexGL.mesh.ColouredInterleavedMesh;
 import com.example.chris.apexvr.apexGL.mesh.ColourizedMesh;
 import com.example.chris.apexvr.apexGL.mesh.MatLib;
-import com.example.chris.apexvr.apexGL.mesh.VertexMesh;
 import com.example.chris.apexvr.apexGL.object.ColouredStaticObject;
 import com.example.chris.apexvr.apexGL.object.GLObject;
 import com.example.chris.apexvr.apexGL.object.MultiCSObject;
-import com.example.chris.apexvr.apexGL.object.VertexObject;
+import com.example.chris.apexvr.apexGL.object.Sky;
 import com.example.chris.apexvr.apexGL.shader.GLProgram;
 import com.example.chris.apexvr.apexGL.shader.Shader;
 import com.example.chris.apexvr.apexGL.shader.Shadow;
@@ -36,6 +35,7 @@ public class ApexGraphics {
     private GLObject rightHand,leftHand;
     private ColourizedMesh moleMesh;
     private GLProgram colProgram;
+    private Sky sky;
 
     private List<GLObject> glObjects;
     private List<ColouredStaticObject> moles;
@@ -69,17 +69,20 @@ public class ApexGraphics {
 
 
 
-        Shadow shadows = new Shadow(shadowProgram,
-                LIGHT_DIR_IN_WORLD_SPACE,
-                new Shadow.BoundingBox(new float[]{0.0f,0.0f,0.0f},new float[]{120.0f,120.0f,20.0f}));
+
 
 
         GroundCreater groundCreater = new GroundCreater(240.0f,200);
 
 
-        groundCreater.perturb(5.0f,0.5f,6,6);//TODO:RE-ENABLE
+//        groundCreater.perturb(5.0f,0.5f,6,6);//TODO:RE-ENABLE
 
         float groudAtZero = groundCreater.maxHight(1.5f,0.0f,Z_CENTER) + 0.5f;
+
+
+        Shadow shadows = new Shadow(shadowProgram,
+                LIGHT_DIR_IN_WORLD_SPACE,
+                10.0f,groudAtZero);
 
         ColouredStaticObject ground = new ColouredStaticObject(colProgram,groundCreater.getMesh());
         Matrix.translateM(ground.getOrientation(),0,0.0f,-groudAtZero,0.0f);
@@ -103,17 +106,7 @@ public class ApexGraphics {
         rightHand = loadStaticMesh(matLib,colProgram,assetManager,"right_hand.obj");
         table.addExtention(shadows);
 
-
-        try {
-            VertexMesh mesh = VertexMesh.importOBJInterleavedMesh(assetManager.open("meshes/sky.obj"));
-            VertexObject sky = new VertexObject(skyProgram,mesh);
-            Matrix.translateM(sky.getOrientation(),0,0.0f,-groudAtZero,0.0f);
-            Matrix.scaleM(sky.getOrientation(),0,2,2,2);
-            glObjects.add(sky);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Could not open obj file: meshes/sky.obj");
-        }
+        sky = new Sky(skyProgram);
 
         try {
             moleMesh = ColourizedMesh.importOBJInterleavedMesh(assetManager.open("meshes/mole.obj"));
@@ -307,10 +300,13 @@ public class ApexGraphics {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
         GLError.checkGLError(TAG,"colorParam");
+        GLES30.glEnable(GLES30.GL_CULL_FACE);
         GLES30.glCullFace(GLES30.GL_BACK);
 
         for(GLObject glObject : glObjects){
             glObject.draw(perspective,view);
         }
+
+        sky.draw(perspective,view);
     }
 }

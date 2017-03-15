@@ -2,6 +2,7 @@ package com.example.chris.apexvr.filtering;
 
 import android.opengl.Matrix;
 import android.os.SystemClock;
+import android.util.Log;
 
 import org.ejml.simple.SimpleMatrix;
 
@@ -131,7 +132,7 @@ public class ApexSensors {
         float dt = (time - frameTime) / 1000.0f;
         frameTime = time;
 
-        //Log.i(TAG,"Frame Rate: " + 1/dt);
+        Log.i(TAG,"Frame Rate: " + 1/dt);
 
         {
             SimpleMatrix xk = A.mult(xYaw);

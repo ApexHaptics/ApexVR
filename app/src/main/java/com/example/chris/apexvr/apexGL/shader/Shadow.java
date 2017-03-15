@@ -34,7 +34,7 @@ public class Shadow implements LightingExtention {
     private int vetexAtribID, pvmUniformID,shadowPVMUniformID, texUniformID;
 
 
-    public Shadow(GLProgram shadowProgram, float[] lightDir, BoundingBox bounding){
+    public Shadow(GLProgram shadowProgram, float[] lightDir, float width, float hight){
 
 
        if(!GLES30.glGetString(GLES30.GL_EXTENSIONS).contains("OES_depth_texture")){
@@ -50,11 +50,6 @@ public class Shadow implements LightingExtention {
         float[] v = new float[16];
         float[] lowerB = new float[3];
         float[] upperB = new float[3];
-
-        for(int i = 0; i < 3; ++i){
-            lowerB[i] = bounding.center[i] - bounding.size[i]/2.0f;
-            upperB[i] = bounding.center[i] + bounding.size[i]/2.0f;
-        }
 
         //Matrix.orthoM(p,0,lowerB[0],upperB[0],lowerB[1],upperB[1],lowerB[2],upperB[2]);
         Matrix.orthoM(p,0,-60,60,-60,60,-20,20);
@@ -151,6 +146,7 @@ public class Shadow implements LightingExtention {
 
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
         GLES30.glDepthFunc(GLES30.GL_LESS);
+        GLES30.glEnable(GLES30.GL_CULL_FACE);
         GLES30.glCullFace(GLES30.GL_FRONT);
 
         GLES30.glGetIntegerv(GLES30.GL_VIEWPORT,viewPort,0);
