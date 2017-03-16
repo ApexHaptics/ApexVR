@@ -49,6 +49,34 @@ public class ColouredInterleavedMesh extends Mesh {
 
     }
 
+    public ColouredInterleavedMesh invert(){
+        FloatBuffer flippedVertices = FloatBuffer.allocate(vertices.capacity());
+        IntBuffer flippedIndexes = IntBuffer.allocate(indexes.capacity());
+
+        for(int i = 0; i < vertices.capacity(); i += FLOAT_STRIDE){
+            flippedVertices.put(-vertices.get());
+            for(int j = 0; j < (FLOAT_STRIDE - 1); ++j){
+                flippedVertices.put(vertices.get());
+            }
+        }
+
+        int[] swap = new int[3];
+
+        for(int i = 0; i < indexes.capacity(); i += 3){
+            for(int j = 2; j >= 0; --j){
+                swap[j] = indexes.get();
+            }
+
+            flippedIndexes.put(swap);
+        }
+
+        flippedVertices.rewind();
+        flippedVertices.rewind();
+
+        return new ColouredInterleavedMesh(flippedVertices,flippedIndexes);
+
+    }
+
     public static ColouredInterleavedMesh importOBJInterleavedMesh(InputStream inputStream, MatLib matLib) throws IOException {
 
         Mesh.ImportOptions options = new ImportOptions(){};

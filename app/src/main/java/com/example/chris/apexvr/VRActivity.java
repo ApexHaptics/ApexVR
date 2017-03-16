@@ -16,8 +16,11 @@ import com.google.vr.sdk.base.Viewport;
 import javax.microedition.khronos.egl.EGLConfig;
 
 import io.github.apexhaptics.apexhapticsdisplay.BluetoothService;
+import io.github.apexhaptics.apexhapticsdisplay.datatypes.GameStatePacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.HeadPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.JointPacket;
+import io.github.apexhaptics.apexhapticsdisplay.datatypes.RobotKinPosPacket;
+import io.github.apexhaptics.apexhapticsdisplay.datatypes.RobotPosPacket;
 
 
 public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
@@ -33,6 +36,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
     private BluetoothService bluetoothService;
 
     private ApexSensors apexSensors;
+    private MoleGame moleGame;
 
 
     @Override
@@ -74,6 +78,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         Log.i(TAG, "Creating Surface");
 
         graphics.loadAssets(getAssets());
+        moleGame = new MoleGame(graphics);
 
         GLError.checkGLError(TAG,"Surface created");
 
@@ -99,6 +104,11 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         graphics.getLeftHand().setOrientation(apexSensors.getLeftHand());
         graphics.getRightHand().setOrientation(apexSensors.getRigthHand());
 
+        moleGame.upadte(
+                (RobotPosPacket)bluetoothService.getPacket(RobotPosPacket.packetString),
+                (GameStatePacket)bluetoothService.getPacket(GameStatePacket.packetString),
+                (RobotKinPosPacket)bluetoothService.getPacket(RobotKinPosPacket.packetString));
+
 //        Matrix.setIdentityM(graphics.getLeftHand().getOrientation(),0);
 //        Matrix.setIdentityM(graphics.getRightHand().getOrientation(),0);
 //
@@ -110,9 +120,9 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
     @Override
     public void onDrawEye(Eye eye) {
 
-//        if(!apexSensors.isReady()){
-//            return;
-//        }
+        if(!apexSensors.isReady()){
+            return;
+        }
 
 
 

@@ -37,4 +37,8 @@ public class RobotKinPosPacket extends BluetoothDataPacket {
 
         return X;
     }
+
+    public boolean removeMole() {
+        return X == 0 && Y == 0 && Z == 0;
+    }
 }

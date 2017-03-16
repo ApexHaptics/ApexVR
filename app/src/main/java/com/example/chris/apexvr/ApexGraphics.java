@@ -39,6 +39,7 @@ public class ApexGraphics {
 
     private List<GLObject> glObjects;
     private List<ColouredStaticObject> moles;
+    private GLObject table;
 
 
     public ApexGraphics(){
@@ -75,7 +76,7 @@ public class ApexGraphics {
         GroundCreater groundCreater = new GroundCreater(240.0f,200);
 
 
-//        groundCreater.perturb(5.0f,0.5f,6,6);//TODO:RE-ENABLE
+        groundCreater.perturb(5.0f,0.5f,6,6);//TODO:RE-ENABLE
 
         float groudAtZero = groundCreater.maxHight(1.5f,0.0f,Z_CENTER) + 0.5f;
 
@@ -95,7 +96,7 @@ public class ApexGraphics {
         pillar.setCastingShadow(true);
         pillar.addExtention(shadows);
 
-        GLObject table = loadStaticMesh(matLib,colProgram,assetManager,"table.obj");
+        table = loadStaticMesh(matLib,colProgram,assetManager,"table.obj");
         Matrix.translateM(table.getOrientation(),0,0.6f,0.0f,Z_CENTER - 0.4f);
         table.setCastingShadow(true);
         table.addExtention(shadows);
@@ -271,8 +272,8 @@ public class ApexGraphics {
 
     }
 
-    public float[] getMoleOrientation(int ID){
-        return moles.get(ID).getOrientation();
+    public GLObject getMole(int ID){
+        return moles.get(ID);
     }
 
     public void removeMole(int ID){
@@ -296,17 +297,27 @@ public class ApexGraphics {
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
         GLES30.glDepthFunc(GLES30.GL_LESS);
 
-        GLES30.glClearColor(0.6172f, 0.0f, 0.9453f, 1.0f);
-        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
+//        GLES30.glClearColor(0.6172f, 0.0f, 0.9453f, 1.0f);
+//        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
+
+        GLES30.glClear(GLES30.GL_DEPTH_BUFFER_BIT);
 
         GLError.checkGLError(TAG,"colorParam");
         GLES30.glEnable(GLES30.GL_CULL_FACE);
         GLES30.glCullFace(GLES30.GL_BACK);
+
+        for(GLObject mole:moles){
+            mole.draw(perspective,view);
+        }
 
         for(GLObject glObject : glObjects){
             glObject.draw(perspective,view);
         }
 
         sky.draw(perspective,view);
+    }
+
+    public GLObject getTable() {
+        return table;
     }
 }

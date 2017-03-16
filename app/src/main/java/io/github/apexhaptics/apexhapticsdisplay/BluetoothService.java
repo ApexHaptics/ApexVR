@@ -562,7 +562,7 @@ public class BluetoothService {
                     }
                     handlePackets(packets);
                 } catch (IOException e) {
-                    Log.e(TAG, "disconnected", e);
+                    Log.w(TAG, "disconnected", e);
                     connectionLost();
                     break;
                 } catch (ArrayIndexOutOfBoundsException e) {

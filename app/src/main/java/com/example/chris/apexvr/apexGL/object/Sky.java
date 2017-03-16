@@ -60,6 +60,9 @@ public class Sky extends GLObject {
 
     @Override
     public void draw(float[] p, float[] v){
+        if(!draw){
+            return;
+        }
         program.use();
 
         for(LightingExtention extention: extentions){

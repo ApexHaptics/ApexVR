@@ -32,7 +32,9 @@ public class MultiCSObject extends ColouredStaticObject {
 
     @Override
     public void draw(float[] p, float[] v){
-
+        if(!draw){
+            return;
+        }
         program.use();
 
 

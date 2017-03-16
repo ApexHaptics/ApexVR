@@ -18,6 +18,7 @@ public abstract class GLObject {
     protected GLProgram program;
     protected float[] orientation;
     protected boolean castingShadow = false;
+    protected boolean draw = true;
     List<LightingExtention> extentions;
 
 
@@ -39,6 +40,10 @@ public abstract class GLObject {
     }
 
     public void draw(float[] p, float[] v){
+        if(!draw){
+            return;
+        }
+
         program.use();
 
         float[] vm = new float[16];
@@ -69,6 +74,14 @@ public abstract class GLObject {
     public void addExtention(LightingExtention extention){
         extention.link(program);
         extentions.add(extention);
+    }
+
+    public boolean isDrawing() {
+        return draw;
+    }
+
+    public void setDraw(boolean draw) {
+        this.draw = draw;
     }
 
     protected abstract void onDraw(float[] pvm, float[] vm, float[] v);
