@@ -599,17 +599,21 @@ public class BluetoothService {
                 if(data[i].equals(HeadPacket.headString)) {
                     HeadPacket packet = new HeadPacket();
                     packet.deltaT = Integer.parseInt(data[1]);
-                    float[] headRotMat = new float[] {
-                            Float.parseFloat(data[i+4]), Float.parseFloat(data[i+5]),Float.parseFloat(data[i+6]),0,
-                            Float.parseFloat(data[i+7]), Float.parseFloat(data[i+8]),Float.parseFloat(data[i+9]),0,
-                            Float.parseFloat(data[i+10]), Float.parseFloat(data[i+11]),Float.parseFloat(data[i+12]),0,
-                            0,0,0,1,
-                    };
+                    float[] headRotMat = null;
+                    if(data.length > 5 && !data[i].equals(RobotPosPacket.robString)) {
+                         headRotMat = new float[]{
+                                Float.parseFloat(data[i + 4]), Float.parseFloat(data[i + 5]), Float.parseFloat(data[i + 6]), 0,
+                                Float.parseFloat(data[i + 7]), Float.parseFloat(data[i + 8]), Float.parseFloat(data[i + 9]), 0,
+                                Float.parseFloat(data[i + 10]), Float.parseFloat(data[i + 11]), Float.parseFloat(data[i + 12]), 0,
+                                0, 0, 0, 1,
+                        };
+                        i += 13;
+                    }
+                    i += 4;
                     packet.setHeadPos(Float.parseFloat(data[i+1]),
                             Float.parseFloat(data[i+2]),
                             Float.parseFloat(data[i+3]),
                             headRotMat);
-                    i += 13;
                     packets.add(packet);
                 }
                 if(data.length > i && data[i].equals(RobotPosPacket.robString)) {
