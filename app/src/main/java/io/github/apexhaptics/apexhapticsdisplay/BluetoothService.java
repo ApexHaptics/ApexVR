@@ -609,7 +609,9 @@ public class BluetoothService {
                         };
                         i += 13;
                     }
-                    i += 4;
+                    else {
+                        i += 4;
+                    }
                     packet.setHeadPos(Float.parseFloat(data[i+1]),
                             Float.parseFloat(data[i+2]),
                             Float.parseFloat(data[i+3]),
