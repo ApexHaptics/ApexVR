@@ -48,7 +48,9 @@ public class MoleGame {
         }
 
         if(gameStatePacket != null){
-            graphics.createMole(0,MoleColours.values()[gameStatePacket.getData()].getColour());
+            graphics.createMole(0, MoleColours.values()[(gameStatePacket.getData() + 1) %
+                    MoleColours.values().length].getColour());
+            graphics.getMole(0).setDraw(false);
         }
 
         if(robotKinPosPacket != null){
@@ -75,12 +77,17 @@ public class MoleGame {
 
     }
 
-    private enum MoleColours{
+    public boolean isReady() {
+        return ready;
+    }
 
+    private enum MoleColours{
+        Black (new float[]{0.0f,0.0f,0.0f}),
         Red (new float[]{1.0f,0.0f,0.0f}),
         Blue (new float[]{0.0f,0.0f,1.0f}),
         Green (new float[]{0.0f,1.0f,0.0f}),
-        Yellow (new float[]{1.0f,0.0f,0.0f});
+        Purple (new float[]{1.0f,0.0f,1.0f}),
+        Yellow (new float[]{1.0f,1.0f,0.0f});
 
         private float[] colour;
 

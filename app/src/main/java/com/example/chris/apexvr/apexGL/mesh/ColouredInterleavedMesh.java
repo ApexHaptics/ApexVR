@@ -55,9 +55,17 @@ public class ColouredInterleavedMesh extends Mesh {
 
         for(int i = 0; i < vertices.capacity(); i += FLOAT_STRIDE){
             flippedVertices.put(-vertices.get());
-            for(int j = 0; j < (FLOAT_STRIDE - 1); ++j){
-                flippedVertices.put(vertices.get());
-            }
+            flippedVertices.put(vertices.get());
+            flippedVertices.put(vertices.get());
+
+            flippedVertices.put(-vertices.get());
+            flippedVertices.put(vertices.get());
+            flippedVertices.put(vertices.get());
+
+            flippedVertices.put(vertices.get());
+            flippedVertices.put(vertices.get());
+            flippedVertices.put(vertices.get());
+
         }
 
         int[] swap = new int[3];
@@ -71,7 +79,7 @@ public class ColouredInterleavedMesh extends Mesh {
         }
 
         flippedVertices.rewind();
-        flippedVertices.rewind();
+        flippedIndexes.rewind();
 
         return new ColouredInterleavedMesh(flippedVertices,flippedIndexes);
 

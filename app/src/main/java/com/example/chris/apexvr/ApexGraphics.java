@@ -76,7 +76,7 @@ public class ApexGraphics {
         GroundCreater groundCreater = new GroundCreater(240.0f,200);
 
 
-        groundCreater.perturb(5.0f,0.5f,6,6);//TODO:RE-ENABLE
+//        groundCreater.perturb(5.0f,0.5f,6,6);//TODO:RE-ENABLE
 
         float groudAtZero = groundCreater.maxHight(1.5f,0.0f,Z_CENTER) + 0.5f;
 
@@ -101,11 +101,26 @@ public class ApexGraphics {
         table.setCastingShadow(true);
         table.addExtention(shadows);
 
-        leftHand = loadStaticMesh(matLib,colProgram,assetManager,"left_hand.obj");
-        table.addExtention(shadows);
 
-        rightHand = loadStaticMesh(matLib,colProgram,assetManager,"right_hand.obj");
-        table.addExtention(shadows);
+        try {
+            ColouredInterleavedMesh handMesh = ColouredInterleavedMesh.importOBJInterleavedMesh(assetManager.open("meshes/left_hand.obj"),matLib);
+            leftHand = new ColouredStaticObject(colProgram,handMesh);
+            leftHand.setDraw(false);
+            rightHand = new ColouredStaticObject(colProgram,handMesh.invert());
+            rightHand.setDraw(false);
+
+            glObjects.add(leftHand);
+            glObjects.add(rightHand);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Could not open obj file: left_hand.obj");
+        }
+
+//        leftHand = loadStaticMesh(matLib,colProgram,assetManager,"left_hand.obj");
+//        table.addExtention(shadows);
+//
+//        rightHand = loadStaticMesh(matLib,colProgram,assetManager,"right_hand.obj");
+//        table.addExtention(shadows);
 
         sky = new Sky(skyProgram);
 

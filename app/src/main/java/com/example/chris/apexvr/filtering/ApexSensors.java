@@ -69,8 +69,8 @@ public class ApexSensors {
         Qyaw.set(1,1,1.5708);
 
         Rlin = new SimpleMatrix(2,2);
-        Rlin.set(0,0,0.2);
-        Rlin.set(1,1,0.2);
+        Rlin.set(0,0,0.1);
+        Rlin.set(1,1,0.3);
 
         Qlin = new SimpleMatrix(2,2);
         Qlin.set(0,0,0);
@@ -184,32 +184,27 @@ public class ApexSensors {
         if(jointPacket != null){
             Joint headJoint = jointPacket.getJoint(Joint.JointType.Head);
             Joint leftHandJoint = jointPacket.getJoint(Joint.JointType.HandLeft);
-//            Joint leftWristJoint = jointPacket.getJoint(Joint.JointType.WristLeft);
             Joint rightHandJoint = jointPacket.getJoint(Joint.JointType.HandRight);
-//            Joint rightWristJoint = jointPacket.getJoint(Joint.JointType.WristRight);
 
             float[] headPos = new float[]{headJoint.X,headJoint.Y,headJoint.Z,1.0f};
             float[] lhPos = new float[]{leftHandJoint.X,leftHandJoint.Y,leftHandJoint.Z,1.0f};
-//            float[] lwPos = correctKinectVector(new float[]{leftWristJoint.X,leftWristJoint.Y,leftWristJoint.Z,1.0f});
             float[] rhPos = new float[]{rightHandJoint.X,rightHandJoint.Y,rightHandJoint.Z,1.0f};
-//            float[] rwPos = correctKinectVector(new float[]{rightWristJoint.X,rightWristJoint.Y,rightWristJoint.Z,1.0f});
 
 
 
-//            float[] lhVec = new float[3];
-//            float[] rhVec = new float[3];
 
             float[] lhrp = new float[3];
             float[] rhrp = new float[3];
 
             for(int i = 0; i < 3; ++i){
-//                lhVec[i] = lhPos[i] - lwPos[i];
-//                rhVec[i] = lwPos[i] - rwPos[i];
 
                 float relative = (float) xPos[i].get(0) - headPos[i];
 
                 lhrp[i] = leftHandEuro[i].filter(lhPos[i]  + relative,dt);
                 rhrp[i] = rigthHandEuro[i].filter(rhPos[i] + relative,dt);
+
+//                lhrp[i] = leftHandEuro[i].filter(lhPos[i],dt);
+//                rhrp[i] = rigthHandEuro[i].filter(rhPos[i],dt);
             }
 
             float[] translation = new float[16];
@@ -218,21 +213,26 @@ public class ApexSensors {
             Matrix.translateM(translation,0,lhrp[0],lhrp[1],lhrp[2]);
             Matrix.multiplyMM(leftHand,0,translation,0,yawRotation(
                     (float)(Math.PI + Math.atan2(lhPos[0]-headPos[0],lhPos[2]-headPos[2]))),0);
+            Matrix.translateM(translation,0,0.0f,0.0f,-0.06f);
 
             Matrix.setIdentityM(translation,0);
             Matrix.translateM(translation,0,rhrp[0],rhrp[1],rhrp[2]);
             Matrix.multiplyMM(rigthHand,0,translation,0,yawRotation(0.0f),0);
-//            Matrix.multiplyMM(rigthHand,0,translation,0,yawRotation(
-//                    (float)(Math.PI + Math.atan2(rhPos[0]-headPos[0],rhPos[2]-headPos[2]))),0);
+            Matrix.multiplyMM(rigthHand,0,translation,0,yawRotation(
+                    (float)(Math.PI + Math.atan2(rhPos[0]-headPos[0],rhPos[2]-headPos[2]))),0);
+            Matrix.translateM(translation,0,0.0f,0.0f,-0.06f);
 
 //            Log.i(TAG,Arrays.toString(lhPos));
 //
 //            Matrix.setIdentityM(leftHand,0);
-//            Matrix.translateM(leftHand,0,lhPos[0],lhPos[1]+KINETEC_HEIGHT,lhPos[2]);
-//
-//            Matrix.setIdentityM(rigthHand,0);
-//            Matrix.translateM(rigthHand,0,rhPos[0],rhPos[1]+KINETEC_HEIGHT,rhPos[2]);
+//            Matrix.translateM(leftHand,0,lhPos[0],lhPos[1],lhPos[2]);
+//            Matrix.multiplyMM(leftHand,0,translation,0,yawRotation(
+//                    (float)(Math.PI + Math.atan2(lhPos[0]-headPos[0],lhPos[2]-headPos[2]))),0);
 
+//            Matrix.setIdentityM(rigthHand,0);
+//            Matrix.translateM(rigthHand,0,rhPos[0],rhPos[1],rhPos[2]);
+//            Matrix.multiplyMM(rigthHand,0,translation,0,yawRotation(
+//                    (float)(Math.PI + Math.atan2(rhPos[0]-headPos[0],rhPos[2]-headPos[2]))),0);
 
 //            rotateTo(leftHand,lhVec);
 //            rotateTo(rigthHand,rhVec);

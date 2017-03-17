@@ -6,7 +6,6 @@ import android.util.Log;
 
 import com.example.chris.apexvr.apexGL.GLError;
 import com.example.chris.apexvr.filtering.ApexSensors;
-import com.google.vr.sdk.audio.GvrAudioEngine;
 import com.google.vr.sdk.base.Eye;
 import com.google.vr.sdk.base.GvrActivity;
 import com.google.vr.sdk.base.GvrView;
@@ -30,7 +29,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
     private static final float Z_NEAR = 0.1f;
     private static final float Z_FAR = 130.0f;
 
-    private GvrAudioEngine gvrAudioEngine;
+//    private GvrAudioEngine gvrAudioEngine;
     private ApexGraphics graphics;
 
     private BluetoothService bluetoothService;
@@ -47,7 +46,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
         Log.i(TAG, "Starting");
 
 
-        gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
+//        gvrAudioEngine = new GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
         graphics = new ApexGraphics();
 
         GvrView gvrView = (GvrView) findViewById(R.id.gvr_view);
@@ -101,8 +100,8 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
                 (HeadPacket) bluetoothService.getPacket(HeadPacket.packetString),
                 (JointPacket) bluetoothService.getPacket(JointPacket.packetString));
 
-        graphics.getLeftHand().setOrientation(apexSensors.getLeftHand());
-        graphics.getRightHand().setOrientation(apexSensors.getRigthHand());
+//        graphics.getLeftHand().setOrientation(apexSensors.getLeftHand());
+//        graphics.getRightHand().setOrientation(apexSensors.getRigthHand());
 
         moleGame.upadte(
                 (RobotPosPacket)bluetoothService.getPacket(RobotPosPacket.packetString),
@@ -120,7 +119,7 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
     @Override
     public void onDrawEye(Eye eye) {
 
-        if(!apexSensors.isReady()){
+        if(!(apexSensors.isReady() && moleGame.isReady())){
             return;
         }
 
@@ -158,14 +157,14 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
 
     @Override
     public void onPause(){
-        gvrAudioEngine.pause();
+//        gvrAudioEngine.pause();
         super.onPause();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        gvrAudioEngine.resume();
+//        gvrAudioEngine.resume();
     }
 
     @Override
