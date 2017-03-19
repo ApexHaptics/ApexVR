@@ -104,7 +104,7 @@ public class ApexSensors {
         Matrix.setIdentityM(rigthHand,0);
         Matrix.translateM(translation,0,0,-1.8f,0);
 
-//        kinectCorrectionData = new KinectCorrectionData();
+        kinectCorrectionData = new KinectCorrectionData();
 
 
     }
@@ -143,10 +143,11 @@ public class ApexSensors {
                 stickerYaw = stickerYaw + (float) xYaw.get(1);
             } else {
                 float[] upVector = upVector(orientation);
+                calculateKinectCorrectionsStep(headPacket.rotMat,upVector);
 
                 //Log.i(TAG, Float.toString(extractYaw(headPacket.rotMat)));
 
-                float[] sticker = headPacket.rotMat;
+                float[] sticker = correctKinectMatrix(headPacket.rotMat);
 
 
                 //stickerYaw = extractYaw(sticker);
@@ -163,96 +164,16 @@ public class ApexSensors {
             Pyaw.set(SimpleMatrix.identity(2).minus(k.mult(C)).mult(Pyaw));
         }
 
-
-//            stickerYaw = unroll(extractYaw(headPacket.rotMat),stickerYaw);
-//            Matrix.setIdentityM(rotation,0);
-//            Matrix.rotateM(rotation,0,
-//                    (float) Math.toDegrees(xYaw.get(0)),0.0f,1.0f,0.0f);
-
-
-        //Matrix.rotateM(rotation,0,orientation,0,
-        //        (float) Math.toDegrees(imuYaw),0.0f,1.0f,0.0f);
-
-
-
-//        rotation = orientation;
-//        Matrix.rotateM(rotation,0,
-//                (float) Math.toDegrees(xYaw.get(0) - imuYaw),0.0f,1.0f,0.0f);
-
-        float[] yawMatrix = yawRotation((float)(xYaw.get(0) + Math.PI) - imuYaw);
-        Matrix.multiplyMM(rotation,0,orientation,0,yawMatrix,0);
-
-
-
-        if(jointPacket != null){
-            Joint headJoint = jointPacket.getJoint(Joint.JointType.Head);
-            Joint leftHandJoint = jointPacket.getJoint(Joint.JointType.HandLeft);
-            Joint rightHandJoint = jointPacket.getJoint(Joint.JointType.HandRight);
-
-            float[] headPos = new float[]{headJoint.X,headJoint.Y,headJoint.Z,1.0f};
-            float[] lhPos = new float[]{leftHandJoint.X,leftHandJoint.Y,leftHandJoint.Z,1.0f};
-            float[] rhPos = new float[]{rightHandJoint.X,rightHandJoint.Y,rightHandJoint.Z,1.0f};
-
-
-            leftHandAboveGround = lhPos[1] > -10.f;
-            rightHandAboveGround = rhPos[1] > -10.f;
-
-
-            float[] lhrp = new float[3];
-            float[] rhrp = new float[3];
-
-            for(int i = 0; i < 3; ++i){
-
-                float relative = (float) xPos[i].get(0) - headPos[i];
-
-                lhrp[i] = leftHandEuro[i].filter(lhPos[i]  + relative,dt);
-                rhrp[i] = rigthHandEuro[i].filter(rhPos[i] + relative,dt);
-
-//                lhrp[i] = leftHandEuro[i].filter(lhPos[i],dt);
-//                rhrp[i] = rigthHandEuro[i].filter(rhPos[i],dt);
-            }
-
-            float[] translation = new float[16];
-
-            Matrix.setIdentityM(translation,0);
-            Matrix.translateM(translation,0,lhrp[0],lhrp[1],lhrp[2]);
-            Matrix.multiplyMM(leftHand,0,translation,0,yawRotation(
-                    (float)(Math.PI + Math.atan2(lhPos[0]-headPos[0],lhPos[2]-headPos[2]))),0);
-            Matrix.translateM(translation,0,0.0f,0.0f,-0.06f);
-
-            Matrix.setIdentityM(translation,0);
-            Matrix.translateM(translation,0,rhrp[0],rhrp[1],rhrp[2]);
-            Matrix.multiplyMM(rigthHand,0,translation,0,yawRotation(0.0f),0);
-            Matrix.multiplyMM(rigthHand,0,translation,0,yawRotation(
-                    (float)(Math.PI + Math.atan2(rhPos[0]-headPos[0],rhPos[2]-headPos[2]))),0);
-            Matrix.translateM(translation,0,0.0f,0.0f,-0.06f);
-
-//            Log.i(TAG,Arrays.toString(lhPos));
-//
-//            Matrix.setIdentityM(leftHand,0);
-//            Matrix.translateM(leftHand,0,lhPos[0],lhPos[1],lhPos[2]);
-//            Matrix.multiplyMM(leftHand,0,translation,0,yawRotation(
-//                    (float)(Math.PI + Math.atan2(lhPos[0]-headPos[0],lhPos[2]-headPos[2]))),0);
-
-//            Matrix.setIdentityM(rigthHand,0);
-//            Matrix.translateM(rigthHand,0,rhPos[0],rhPos[1],rhPos[2]);
-//            Matrix.multiplyMM(rigthHand,0,translation,0,yawRotation(
-//                    (float)(Math.PI + Math.atan2(rhPos[0]-headPos[0],rhPos[2]-headPos[2]))),0);
-
-//            rotateTo(leftHand,lhVec);
-//            rotateTo(rigthHand,rhVec);
-
-        }
-
         if (headPacket != null){
-            stickerPos = new float[]{headPacket.X,headPacket.Y,headPacket.Z,1.0f};
+            stickerPos = correctKinectVector(
+                    new float[]{headPacket.X,headPacket.Y,headPacket.Z,1.0f});
             //Log.i(TAG, Arrays.toString(stickerPos));
         }
 
         if(jointPacket != null){
             Joint head = jointPacket.getJoint(Joint.JointType.Head);
 
-            float[] newSkeletonPos = new float[]{head.X,head.Y,head.Z,1.0f};
+            float[] newSkeletonPos = correctKinectVector(new float[]{head.X,head.Y,head.Z,1.0f});
             float[] dSkeletonPos = new float[3];
             for(int i = 0; i < 3; ++i){
                 dSkeletonPos[i] = (newSkeletonPos[i] - skeletonPos[i]);
@@ -264,7 +185,8 @@ public class ApexSensors {
                     stickerPos[i] += dSkeletonPos[i];
                 }
             } else {
-                stickerPos = new float[]{headPacket.X,headPacket.Y,headPacket.Z,1.0f};
+                stickerPos = correctKinectVector(
+                        new float[]{headPacket.X,headPacket.Y,headPacket.Z,1.0f});
             }
 
             for(int i = 0; i < 3; ++i){
@@ -287,7 +209,10 @@ public class ApexSensors {
     public void startKalman(float[] orientation, HeadPacket headPacket, JointPacket jointPacket){
         frameTime = SystemClock.currentThreadTimeMillis();
 
-        float[] sticker = headPacket.rotMat;
+        float[] upVector = upVector(orientation);
+        calculateKinectCorrectionsStep(headPacket.rotMat,upVector);
+
+        float[] sticker = correctKinectMatrix(headPacket.rotMat);
 
         xYaw = new SimpleMatrix(2,1);
         imuYaw = -extractYaw(orientation);
@@ -300,9 +225,9 @@ public class ApexSensors {
 
         Joint head = jointPacket.getJoint(Joint.JointType.Head);
 
-        stickerPos = new float[]{headPacket.X,headPacket.Y,headPacket.Z,1.0f};
+        stickerPos = correctKinectVector(new float[]{headPacket.X,headPacket.Y,headPacket.Z,1.0f});
 
-        skeletonPos = new float[]{head.X,head.Y,head.Z,1.0f};
+        skeletonPos = correctKinectVector(new float[]{head.X,head.Y,head.Z,1.0f});
 
         xPos = new SimpleMatrix[3];
         PPos = new SimpleMatrix[3];
@@ -484,14 +409,14 @@ public class ApexSensors {
         float f = 1.f / kinectCorrectionData.averages;
         float[] up_vector_kinect = new float[4];
         Matrix.multiplyMV(up_vector_kinect, 0, kinect_space_transform, 0, up_vector, 0);
-        //kinectCorrectionData.roll = (float)Math.atan2(up_vector_kinect[0], up_vector_kinect[1])*f + kinectCorrectionData.roll*(1.f - f);
-        kinectCorrectionData.roll = (float)Math.PI;
+
+        kinectCorrectionData.roll = (float)Math.atan2(up_vector_kinect[0], up_vector_kinect[1])*f + kinectCorrectionData.roll*(1.f - f);
         float[] kinect_roll_corrector = new float[16];
         Matrix.setRotateM(kinect_roll_corrector, 0, (float)Math.toDegrees(kinectCorrectionData.roll), 0, 0, 1);
         float[] up_vector_kinect_corrected = new float[4];
         Matrix.multiplyMV(up_vector_kinect_corrected, 0, kinect_roll_corrector, 0, up_vector_kinect, 0);
+
         kinectCorrectionData.pitch = (float)Math.atan2(-up_vector_kinect_corrected[2], up_vector_kinect_corrected[1])*f + kinectCorrectionData.pitch*(1.f - f);
-        kinectCorrectionData.pitch = 0;
         float[] kinect_pitch_corrector = new float[16];
         Matrix.setRotateM(kinect_pitch_corrector, 0, (float)Math.toDegrees(kinectCorrectionData.pitch), 1, 0, 0);
         Matrix.multiplyMM(kinectCorrectionData.correction_premultiplier_matrix, 0, kinect_pitch_corrector, 0, kinect_roll_corrector, 0);
