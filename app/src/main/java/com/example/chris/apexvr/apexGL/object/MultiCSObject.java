@@ -17,6 +17,7 @@ import java.util.List;
 
 public class MultiCSObject extends ColouredStaticObject {
     private List<float[]> subOriens = new ArrayList<>(50);
+    private float exclustion  = 5.0f;
 
     public MultiCSObject(GLProgram program, ColouredInterleavedMesh mesh) {
         super(program, mesh);
@@ -47,6 +48,10 @@ public class MultiCSObject extends ColouredStaticObject {
             Matrix.multiplyMM(vms,0,v,0,ms,0);
             Matrix.multiplyMM(pvms,0,p,0,vms,0);
 
+            if(vms[14] > exclustion){
+                continue;
+            }
+
 
             for(LightingExtention extention: extentions){
                 extention.bind(p,v,ms);
@@ -75,4 +80,7 @@ public class MultiCSObject extends ColouredStaticObject {
 
     }
 
+    public void setExclustion(float exclustion) {
+        this.exclustion = exclustion;
+    }
 }

@@ -17,6 +17,9 @@ public class ApexSensors {
 
     private static final String TAG = "Apex_Kalman";
 
+    boolean leftHandAboveGround = false;
+    boolean rightHandAboveGround = false;
+
     float[] translation = new float[16];
     float[] rotation = new float[16];
     float[] leftHand = new float[16];
@@ -112,7 +115,7 @@ public class ApexSensors {
 
 
         if (!ready) {
-            ready = !(headPacket == null || jointPacket == null);
+            ready = !(headPacket == null || jointPacket == null || headPacket.rotMat == null);
 
             if (ready) {
                 startKalman(orientation, headPacket, jointPacket);
@@ -136,7 +139,7 @@ public class ApexSensors {
             SimpleMatrix xk = A.mult(xYaw);
             Pyaw.set(A.mult(Pyaw.mult(A.transpose())).plus(Qyaw));
 
-            if (headPacket == null) {
+            if (headPacket == null || headPacket.rotMat == null) {
                 stickerYaw = stickerYaw + (float) xYaw.get(1);
             } else {
                 float[] upVector = upVector(orientation);
@@ -191,6 +194,8 @@ public class ApexSensors {
             float[] rhPos = new float[]{rightHandJoint.X,rightHandJoint.Y,rightHandJoint.Z,1.0f};
 
 
+            leftHandAboveGround = lhPos[1] > -10.f;
+            rightHandAboveGround = rhPos[1] > -10.f;
 
 
             float[] lhrp = new float[3];
@@ -321,6 +326,14 @@ public class ApexSensors {
         Matrix.multiplyMM(camera,0, rotation,0,translation,0);
 
         return camera;
+    }
+
+    public boolean isLeftHandAboveGround() {
+        return leftHandAboveGround;
+    }
+
+    public boolean isRightHandAboveGround() {
+        return rightHandAboveGround;
     }
 
     public float[] getLeftHand(){

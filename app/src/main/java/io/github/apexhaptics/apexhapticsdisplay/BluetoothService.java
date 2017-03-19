@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -599,7 +600,7 @@ public class BluetoothService {
                 if(data[i].equals(HeadPacket.headString)) {
                     HeadPacket packet = new HeadPacket();
                     packet.deltaT = Integer.parseInt(data[1]);
-                    if(data.length > 5 && !data[i].equals(RobotPosPacket.robString)) {
+                    if(data.length > 6 && !data[i+4].equals(RobotPosPacket.robString)) {
                         float[] headRotMat = new float[]{
                                 Float.parseFloat(data[i + 4]), Float.parseFloat(data[i + 5]), Float.parseFloat(data[i + 6]), 0,
                                 Float.parseFloat(data[i + 7]), Float.parseFloat(data[i + 8]), Float.parseFloat(data[i + 9]), 0,
@@ -638,7 +639,7 @@ public class BluetoothService {
                     packets.add(packet);
                 }
             } catch (ArrayIndexOutOfBoundsException e) {
-                Log.e(TAG, "Incorrectly formatted MARKER message");
+                Log.e(TAG, "Incorrectly formatted MARKER message: " + Arrays.toString(data));
             }
             return packets;
         }

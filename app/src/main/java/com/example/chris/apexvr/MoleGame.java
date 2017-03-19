@@ -40,6 +40,7 @@ public class MoleGame {
             Matrix.setIdentityM(tableLocation,0);
             Matrix.translateM(tableLocation,0, robotPosPacket.X,0.0f,robotPosPacket.Z);
             Matrix.multiplyMM(graphics.getTable().getOrientation(),0, tableLocation,0,tableRotation,0);
+            Matrix.scaleM(graphics.getTable().getOrientation(),0,1.2f,1.0f,1.2f);
 
         }
 
@@ -82,7 +83,7 @@ public class MoleGame {
     }
 
     private enum MoleColours{
-        Black (new float[]{0.0f,0.0f,0.0f}),
+        Black (new float[]{0.1f,0.1f,0.1f}),
         Red (new float[]{1.0f,0.0f,0.0f}),
         Blue (new float[]{0.0f,0.0f,1.0f}),
         Green (new float[]{0.0f,1.0f,0.0f}),

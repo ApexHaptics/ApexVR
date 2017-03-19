@@ -100,8 +100,11 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
                 (HeadPacket) bluetoothService.getPacket(HeadPacket.packetString),
                 (JointPacket) bluetoothService.getPacket(JointPacket.packetString));
 
-//        graphics.getLeftHand().setOrientation(apexSensors.getLeftHand());
-//        graphics.getRightHand().setOrientation(apexSensors.getRigthHand());
+        graphics.getLeftHand().setDraw(apexSensors.isLeftHandAboveGround());
+        graphics.getRightHand().setDraw(apexSensors.isRightHandAboveGround());
+
+        graphics.getLeftHand().setOrientation(apexSensors.getLeftHand());
+        graphics.getRightHand().setOrientation(apexSensors.getRigthHand());
 
         moleGame.upadte(
                 (RobotPosPacket)bluetoothService.getPacket(RobotPosPacket.packetString),
