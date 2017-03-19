@@ -33,7 +33,7 @@ public class ApexSensors {
 
     OneEuro[] leftHandEuro,rigthHandEuro, headPosEuro;
 
-//    private KinectCorrectionData kinectCorrectionData;
+    private KinectCorrectionData kinectCorrectionData;
 
     private SimpleMatrix A;
     private SimpleMatrix C;
@@ -471,110 +471,43 @@ public class ApexSensors {
         };
     }
 
-//    private static class KinectCorrectionData {
-//        float roll = 0;
-//        float pitch = 0;
-//        int averages = 0;
-//        float[] correction_premultiplier_matrix = new float[16];
-//    }
-//
-//    private void calculateKinectCorrectionsStep(float[] kinect_space_transform, float[] up_vector){
-//        // cumulative averaging
-//        kinectCorrectionData.averages = Math.min(kinectCorrectionData.averages+1, 100);
-//        float f = 1.f / kinectCorrectionData.averages;
-//        float[] up_vector_kinect = new float[4];
-//        Matrix.multiplyMV(up_vector_kinect, 0, kinect_space_transform, 0, up_vector, 0);
-//        //kinectCorrectionData.roll = (float)Math.atan2(up_vector_kinect[0], up_vector_kinect[1])*f + kinectCorrectionData.roll*(1.f - f);
-//        kinectCorrectionData.roll = (float)Math.PI;
-//        float[] kinect_roll_corrector = new float[16];
-//        Matrix.setRotateM(kinect_roll_corrector, 0, (float)Math.toDegrees(kinectCorrectionData.roll), 0, 0, 1);
-//        float[] up_vector_kinect_corrected = new float[4];
-//        Matrix.multiplyMV(up_vector_kinect_corrected, 0, kinect_roll_corrector, 0, up_vector_kinect, 0);
-//        kinectCorrectionData.pitch = (float)Math.atan2(-up_vector_kinect_corrected[2], up_vector_kinect_corrected[1])*f + kinectCorrectionData.pitch*(1.f - f);
-//        kinectCorrectionData.pitch = 0;
-//        float[] kinect_pitch_corrector = new float[16];
-//        Matrix.setRotateM(kinect_pitch_corrector, 0, (float)Math.toDegrees(kinectCorrectionData.pitch), 1, 0, 0);
-//        Matrix.multiplyMM(kinectCorrectionData.correction_premultiplier_matrix, 0, kinect_pitch_corrector, 0, kinect_roll_corrector, 0);
-//    }
-//
-//    private float[] correctKinectVector(float[] vector){
-//        float[] correctedVector = new float[4];
-//        Matrix.multiplyMV(correctedVector, 0, kinectCorrectionData.correction_premultiplier_matrix, 0, vector, 0);
-//        return correctedVector;
-//    }
-//
-//    private float[] correctKinectMatrix(float[] matrix){
-//        float[] correctedMatrix = new float[16];
-//        Matrix.multiplyMM(correctedMatrix, 0, kinectCorrectionData.correction_premultiplier_matrix, 0, matrix, 0);
-//        return correctedMatrix;
-//    }
+    private static class KinectCorrectionData {
+        float roll = 0;
+        float pitch = 0;
+        int averages = 0;
+        float[] correction_premultiplier_matrix = new float[16];
+    }
 
+    private void calculateKinectCorrectionsStep(float[] kinect_space_transform, float[] up_vector){
+        // cumulative averaging
+        kinectCorrectionData.averages = Math.min(kinectCorrectionData.averages+1, 100);
+        float f = 1.f / kinectCorrectionData.averages;
+        float[] up_vector_kinect = new float[4];
+        Matrix.multiplyMV(up_vector_kinect, 0, kinect_space_transform, 0, up_vector, 0);
+        //kinectCorrectionData.roll = (float)Math.atan2(up_vector_kinect[0], up_vector_kinect[1])*f + kinectCorrectionData.roll*(1.f - f);
+        kinectCorrectionData.roll = (float)Math.PI;
+        float[] kinect_roll_corrector = new float[16];
+        Matrix.setRotateM(kinect_roll_corrector, 0, (float)Math.toDegrees(kinectCorrectionData.roll), 0, 0, 1);
+        float[] up_vector_kinect_corrected = new float[4];
+        Matrix.multiplyMV(up_vector_kinect_corrected, 0, kinect_roll_corrector, 0, up_vector_kinect, 0);
+        kinectCorrectionData.pitch = (float)Math.atan2(-up_vector_kinect_corrected[2], up_vector_kinect_corrected[1])*f + kinectCorrectionData.pitch*(1.f - f);
+        kinectCorrectionData.pitch = 0;
+        float[] kinect_pitch_corrector = new float[16];
+        Matrix.setRotateM(kinect_pitch_corrector, 0, (float)Math.toDegrees(kinectCorrectionData.pitch), 1, 0, 0);
+        Matrix.multiplyMM(kinectCorrectionData.correction_premultiplier_matrix, 0, kinect_pitch_corrector, 0, kinect_roll_corrector, 0);
+    }
 
+    private float[] correctKinectVector(float[] vector){
+        float[] correctedVector = new float[4];
+        Matrix.multiplyMV(correctedVector, 0, kinectCorrectionData.correction_premultiplier_matrix, 0, vector, 0);
+        return correctedVector;
+    }
 
-    //        if(headPacket != null){
-//            float[] upVector = upVector(orientation);
-//            kinectCorrectionData = calculateKinectCorrections(
-//                    headPacket.rotMat, upVector);
-//
-//            float[] sticker = correctKinectMatrix(kinectCorrectionData,headPacket.rotMat);
-//            float newYaw = extractYaw(sticker);
-//
-//
-//            float yawmod = (float) ((Math.abs(stickerYaw)+Math.PI)%(2*Math.PI)-Math.PI);
-//            if(stickerYaw < 0){
-//                yawmod =-yawmod;
-//            }
-//
-//            float diff = yawmod - newYaw;
-//
-//            if(Math.abs(diff) < Math.PI){
-//                stickerYaw -= diff * 0.1f;
-//            }else{
-//                if(diff > 0){
-//                    stickerYaw += (float)(diff - Math.PI)*0.05f;
-//                }else{
-//                    stickerYaw += (float)(diff + Math.PI)*0.05f;
-//                }
-//            }
-//
-//            pos[0] = headPacket.X*-1; // The data is pre-filtered
-//            pos[1] = headPacket.Y-1.8f;
-//            pos[2] = headPacket.Z;
-//            //pos[2] = headPacket.Z+1.5f;
-//
-//            Matrix.translateM(translation,0,0,-1.2f,0);
-//        }
-//
-//        //Log.i(TAG,"stickerYaw: " + stickerYaw);
-//
-//        float imu = -extractYaw(orientation);
-//
-//        offSet = 0.01f*(stickerYaw - imu) + (1-0.01f)*offSet;
-//
-//
-//
-//
-//        for(int i = 12; i<15; ++i){
-//            orientation[i] = 0;
-//        }
-//
-//        //Matrix.rotateM(rotation,0,1.0f,0.0f,1.0f,0.0f);
-//        //Matrix.setIdentityM(rotation,0);
-//        Matrix.rotateM(rotation,0,orientation,0, (float) Math.toDegrees(offSet),0.0f,1.0f,0.0f);
-//        //Matrix.rotateM(rotation,0, (float) Math.toDegrees(offSet + imu),0.0f,1.0f,0.0f);
-//
-//        //Matrix.rotateM(rotation,0,orientation,0, (float) Math.toDegrees(xYaw.get(0)+xYaw.get(2)-imu),0,1,0);
-//
-//        if(jointPacket != null){
-//            Joint head = jointPacket.getJoint(Joint.JointType.Head);
-//
-////            pos[0] = (float) (pos[0]*0.5-0.5*head.X);
-////            pos[1] = (float) (pos[1]*0.5+0.5*(head.Y -1.8f));
-////            pos[2] = (float) (pos[2]*0.5+0.5*head.Z);
-//
-//            //Matrix.setIdentityM(translation,0);
-//            //Matrix.translateM(translation,0,-head.X,-head.Y,-head.Z);
-//        }
+    private float[] correctKinectMatrix(float[] matrix){
+        float[] correctedMatrix = new float[16];
+        Matrix.multiplyMM(correctedMatrix, 0, kinectCorrectionData.correction_premultiplier_matrix, 0, matrix, 0);
+        return correctedMatrix;
+    }
 
 
 }

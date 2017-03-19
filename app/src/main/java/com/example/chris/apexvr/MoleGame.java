@@ -23,8 +23,21 @@ public class MoleGame {
         tableLocation = new float[16];
         Matrix.setIdentityM(tableLocation,0);
         this.graphics = graphics;
-        graphics.createMole(MoleColours.Red.getColour());
-        graphics.getMole(0).setDraw(false);
+        for(int i = 0; i < 5; ++i){
+            for(int j =0; j < 5; ++j){
+                int mole = graphics.createMole(MoleColours.Red.getColour());
+                graphics.getMole(mole).setDraw(false);
+
+                float[] moleTransform = new float[16];
+                Matrix.multiplyMM(moleTransform,0,tableLocation,0,tableRotation,0);
+                Matrix.translateM(graphics.getMole(mole).getOrientation(),0,moleTransform,0,
+                        i/5.0f-0.5f,TABLE_HIGHT,j/5.0f-0.5f);
+
+                Matrix.scaleM(graphics.getMole(mole).getOrientation(),0,1.0f,(i+j)/20.0f,1.0f);
+
+            }
+        }
+
     }
 
 
@@ -47,34 +60,6 @@ public class MoleGame {
         if(!ready){
             return;
         }
-
-        if(gameStatePacket != null){
-            graphics.createMole(0, MoleColours.values()[(gameStatePacket.getData() + 1) %
-                    MoleColours.values().length].getColour());
-            graphics.getMole(0).setDraw(false);
-        }
-
-        if(robotKinPosPacket != null){
-            if(graphics.getNumberOfMoles() > 0){
-                if(robotKinPosPacket.removeMole() || robotKinPosPacket.getY() < TABLE_HIGHT){
-                    graphics.getMole(0).setDraw(false);
-                    return;
-                }
-
-                graphics.getMole(0).setDraw(true);
-
-                float[] moleTransform = new float[16];
-                float[] moleDisplacement = new float[16];
-                Matrix.setIdentityM(moleDisplacement,0);
-                Matrix.translateM(moleDisplacement,0,robotKinPosPacket.getX(),TABLE_HIGHT,robotKinPosPacket.getZ());
-                Matrix.multiplyMM(moleTransform,0,moleDisplacement,0,tableRotation,0);
-                Matrix.scaleM(graphics.getMole(0).getOrientation(),0,moleTransform,0,
-                        1.0f,robotKinPosPacket.getY()-TABLE_HIGHT,1.0f);
-            }
-        }
-
-
-
 
     }
 
