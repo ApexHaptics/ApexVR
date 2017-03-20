@@ -25,8 +25,7 @@ public class MoleGame {
         this.graphics = graphics;
         for(int i = 0; i < 5; ++i){
             for(int j =0; j < 5; ++j){
-                int mole = graphics.createMole(MoleColours.Red.getColour());
-                graphics.getMole(mole).setDraw(false);
+                int mole = graphics.createMole(MoleColours.values()[i+j%MoleColours.values().length].getColour());
 
                 float[] moleTransform = new float[16];
                 Matrix.multiplyMM(moleTransform,0,tableLocation,0,tableRotation,0);

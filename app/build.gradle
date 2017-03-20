@@ -5,7 +5,7 @@ android {
     buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "com.example.chris.apexvr"
-        minSdkVersion 19
+        minSdkVersion 23
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -17,10 +17,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    productFlavors {
+    }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
@@ -28,6 +30,6 @@ dependencies {
     compile 'com.google.vr:sdk-audio:1.10.0'
     compile 'com.google.vr:sdk-base:1.10.0'
     compile 'com.google.vr:sdk-common:1.10.0'
-    compile group: 'org.ejml', name: 'all', version: '0.30'
+    compile 'org.ejml:all:0.30'
     testCompile 'junit:junit:4.12'
 }
