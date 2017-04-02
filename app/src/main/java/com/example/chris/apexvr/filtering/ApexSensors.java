@@ -25,6 +25,7 @@ public class ApexSensors {
     boolean leftHandAboveGround = false;
     boolean rightHandAboveGround = false;
 
+    float[] pos = new float[3];
     float[] translation = new float[16];
     float[] rotation = new float[16];
     float[] leftHand = new float[16];
@@ -109,19 +110,21 @@ public class ApexSensors {
         Matrix.setIdentityM(leftHand,0);
         Matrix.setIdentityM(rigthHand,0);
         Matrix.translateM(translation,0,0,-1.8f,0);
+        pos[1] = 1.8f;
 
         kinectCorrectionData = new KinectCorrectionData();
         dataLogger = new DataLogger();
 
 
     }
-    float[] pos = new float[3];
+
 
     public void step(float[] orientation, HeadPacket headPacket, JointPacket jointPacket) {
 
 
 
         if (!ready) {
+
             ready = !(headPacket == null || jointPacket == null || headPacket.rotMat == null);
 
             if (ready) {
