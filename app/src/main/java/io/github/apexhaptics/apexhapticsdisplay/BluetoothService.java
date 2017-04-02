@@ -62,8 +62,8 @@ public class BluetoothService {
     // Unique UUID shared with the PC application
     private static final UUID MY_UUID =
             UUID.fromString("2611ba68-84e1-4842-a15e-0bfc7e096686");
-//    private static final CharSequence TAGET_NAME = "GEMMI";
-    private static final CharSequence TAGET_NAME = "DESKTOP";
+    private static final CharSequence TAGET_NAME = "GEMMI";
+//    private static final CharSequence TAGET_NAME = "DESKTOP";
 //    private static final CharSequence TAGET_NAME = "ALICE";
 //    private static final CharSequence TAGET_NAME = "nope";
 
@@ -107,8 +107,7 @@ public class BluetoothService {
             return;
         }
 
-        detectDeviceThread d = new detectDeviceThread();
-        d.run();
+        (new detectDeviceThread()).start();
     }
 
     private class detectDeviceThread extends Thread {

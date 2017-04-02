@@ -3,7 +3,12 @@ package com.example.chris.apexvr.filtering;
 import android.opengl.Matrix;
 import android.os.SystemClock;
 
+import com.example.chris.apexvr.DataLogger;
+
 import org.ejml.simple.SimpleMatrix;
+
+import java.nio.Buffer;
+import java.nio.FloatBuffer;
 
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.HeadPacket;
 import io.github.apexhaptics.apexhapticsdisplay.datatypes.Joint;
@@ -51,6 +56,7 @@ public class ApexSensors {
     private Long frameTime;
 
     private boolean ready = false;
+    private DataLogger dataLogger;
 
     public ApexSensors(){
 
@@ -105,6 +111,7 @@ public class ApexSensors {
         Matrix.translateM(translation,0,0,-1.8f,0);
 
         kinectCorrectionData = new KinectCorrectionData();
+        dataLogger = new DataLogger();
 
 
     }
@@ -124,14 +131,26 @@ public class ApexSensors {
             return;
         }
 
-
         //float newImuYaw = unroll(-extractYaw(orientation), (float) xYaw.get(0));
         float dImuYaw = unroll((-extractYaw(orientation)) - imuYaw, 0);
         imuYaw = imuYaw + dImuYaw;
 
-        long time = SystemClock.currentThreadTimeMillis();
+        long time = SystemClock.elapsedRealtime();
         float dt = (time - frameTime) / 1000.0f;
         frameTime = time;
+
+        dataLogger.logIMU(orientation,time);
+        if(headPacket != null){
+            if(headPacket.rotMat == null){
+                dataLogger.logSticker(new float[]{headPacket.X,headPacket.Y,headPacket.Z},time);
+            }else{
+                dataLogger.logSticker(headPacket.rotMat,new float[]{headPacket.X,headPacket.Y,headPacket.Z},time);
+            }
+        }
+        if(jointPacket != null){
+            Joint head = jointPacket.getJoint(Joint.JointType.Head);
+            dataLogger.logSkell(head.getCoordArray(),time);
+        }
 
 //        Log.i(TAG,"Frame Rate: " + 1/dt);
 
@@ -142,12 +161,13 @@ public class ApexSensors {
             if (headPacket == null || headPacket.rotMat == null) {
                 stickerYaw = stickerYaw + (float) xYaw.get(1);
             } else {
-                float[] upVector = upVector(orientation);
-                calculateKinectCorrectionsStep(headPacket.rotMat,upVector);
+//                float[] upVector = upVector(orientation);
+//                calculateKinectCorrectionsStep(headPacket.rotMat,upVector);
 
                 //Log.i(TAG, Float.toString(extractYaw(headPacket.rotMat)));
 
-                float[] sticker = correctKinectMatrix(headPacket.rotMat);
+//                float[] sticker = correctKinectMatrix(headPacket.rotMat);
+                float[] sticker = headPacket.rotMat;
 
 
                 //stickerYaw = extractYaw(sticker);
@@ -162,18 +182,25 @@ public class ApexSensors {
 
             xYaw.set(xk.plus(k.mult(yk)));
             Pyaw.set(SimpleMatrix.identity(2).minus(k.mult(C)).mult(Pyaw));
+
+
+            float[] yawMatrix = yawRotation((float)(xYaw.get(0) + Math.PI) - imuYaw);
+            Matrix.multiplyMM(rotation,0,orientation,0,yawMatrix,0);
         }
 
         if (headPacket != null){
-            stickerPos = correctKinectVector(
-                    new float[]{headPacket.X,headPacket.Y,headPacket.Z,1.0f});
+//            stickerPos = correctKinectVector(
+//                    new float[]{headPacket.X,headPacket.Y,headPacket.Z,1.0f});
+
+            stickerPos = new float[]{headPacket.X,headPacket.Y,headPacket.Z,1.0f};
             //Log.i(TAG, Arrays.toString(stickerPos));
         }
 
         if(jointPacket != null){
             Joint head = jointPacket.getJoint(Joint.JointType.Head);
 
-            float[] newSkeletonPos = correctKinectVector(new float[]{head.X,head.Y,head.Z,1.0f});
+//            float[] newSkeletonPos = correctKinectVector(new float[]{head.X,head.Y,head.Z,1.0f});
+            float[] newSkeletonPos = new float[]{head.X,head.Y,head.Z,1.0f};
             float[] dSkeletonPos = new float[3];
             for(int i = 0; i < 3; ++i){
                 dSkeletonPos[i] = (newSkeletonPos[i] - skeletonPos[i]);
@@ -185,8 +212,9 @@ public class ApexSensors {
                     stickerPos[i] += dSkeletonPos[i];
                 }
             } else {
-                stickerPos = correctKinectVector(
-                        new float[]{headPacket.X,headPacket.Y,headPacket.Z,1.0f});
+//                stickerPos = correctKinectVector(
+//                        new float[]{headPacket.X,headPacket.Y,headPacket.Z,1.0f});
+                stickerPos = new float[]{headPacket.X,headPacket.Y,headPacket.Z,1.0f};
             }
 
             for(int i = 0; i < 3; ++i){
@@ -207,10 +235,10 @@ public class ApexSensors {
     }
 
     public void startKalman(float[] orientation, HeadPacket headPacket, JointPacket jointPacket){
-        frameTime = SystemClock.currentThreadTimeMillis();
+        frameTime = SystemClock.elapsedRealtime();
 
-        float[] upVector = upVector(orientation);
-        calculateKinectCorrectionsStep(headPacket.rotMat,upVector);
+//        float[] upVector = upVector(orientation);
+//        calculateKinectCorrectionsStep(headPacket.rotMat,upVector);
 
         float[] sticker = correctKinectMatrix(headPacket.rotMat);
 
@@ -225,9 +253,11 @@ public class ApexSensors {
 
         Joint head = jointPacket.getJoint(Joint.JointType.Head);
 
-        stickerPos = correctKinectVector(new float[]{headPacket.X,headPacket.Y,headPacket.Z,1.0f});
+//        stickerPos = correctKinectVector(new float[]{headPacket.X,headPacket.Y,headPacket.Z,1.0f});
+        stickerPos = new float[]{headPacket.X,headPacket.Y,headPacket.Z,1.0f};
 
-        skeletonPos = correctKinectVector(new float[]{head.X,head.Y,head.Z,1.0f});
+//        skeletonPos = correctKinectVector(new float[]{head.X,head.Y,head.Z,1.0f});
+        skeletonPos = new float[]{head.X,head.Y,head.Z,1.0f};
 
         xPos = new SimpleMatrix[3];
         PPos = new SimpleMatrix[3];
@@ -434,5 +464,7 @@ public class ApexSensors {
         return correctedMatrix;
     }
 
-
+    public DataLogger getDataLogger() {
+        return dataLogger;
+    }
 }

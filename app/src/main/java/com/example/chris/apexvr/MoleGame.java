@@ -23,19 +23,6 @@ public class MoleGame {
         tableLocation = new float[16];
         Matrix.setIdentityM(tableLocation,0);
         this.graphics = graphics;
-        for(int i = 0; i < 5; ++i){
-            for(int j =0; j < 5; ++j){
-                int mole = graphics.createMole(MoleColours.values()[i+j%MoleColours.values().length].getColour());
-
-                float[] moleTransform = new float[16];
-                Matrix.multiplyMM(moleTransform,0,tableLocation,0,tableRotation,0);
-                Matrix.translateM(graphics.getMole(mole).getOrientation(),0,moleTransform,0,
-                        i/5.0f-0.5f,TABLE_HIGHT,j/5.0f-0.5f);
-
-                Matrix.scaleM(graphics.getMole(mole).getOrientation(),0,1.0f,(i+j)/20.0f,1.0f);
-
-            }
-        }
 
     }
 
@@ -58,6 +45,22 @@ public class MoleGame {
 
         if(!ready){
             return;
+        }
+
+        if(graphics.getNumberOfMoles() == 0){
+            for(int i = 1; i < 5; ++i){
+                for(int j = 1; j < 5; ++j){
+                    int mole = graphics.createMole(MoleColours.values()[(i+j)%MoleColours.values().length].getColour());
+
+                    float[] moleTransform = new float[16];
+                    Matrix.multiplyMM(moleTransform,0,tableLocation,0,tableRotation,0);
+                    Matrix.translateM(graphics.getMole(mole).getOrientation(),0,moleTransform,0,
+                            i/5.0f-0.5f,TABLE_HIGHT,j/5.0f-0.5f);
+
+                    Matrix.scaleM(graphics.getMole(mole).getOrientation(),0,1.0f,(i+j)/20.0f,1.0f);
+
+                }
+            }
         }
 
     }

@@ -111,9 +111,9 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
     @Override
     public void onDrawEye(Eye eye) {
 
-        if(!(apexSensors.isReady() && moleGame.isReady())){
-            return;
-        }
+//        if(!(apexSensors.isReady() && moleGame.isReady())){
+//            return;
+//        }
 
 
 
@@ -162,6 +162,10 @@ public class VRActivity extends GvrActivity implements GvrView.StereoRenderer{
     @Override
     public void onRendererShutdown() {
         Log.i(TAG,"Render shutting down...");
+
+        apexSensors.getDataLogger().saveLog();
+
+        Log.i(TAG,"data logged");
 
     }
 
